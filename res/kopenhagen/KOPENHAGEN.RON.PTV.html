@@ -1,0 +1,337 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0047)http://www.kopenhagen.com.br/site/nossas-lojas/ -->
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>
+	KOPENHAGEN »
+</title>
+        <link rel="stylesheet" href="./KOPENHAGEN.RON.PTV_files/jquery-ui-1.8.4.custom.css" type="text/css" media="screen">
+        <link rel="stylesheet" href="./KOPENHAGEN.RON.PTV_files/reset.css" type="text/css" media="screen">
+        <link rel="stylesheet" href="./KOPENHAGEN.RON.PTV_files/style.css" type="text/css" media="screen">
+        <!--[if IE 7]>
+          <link rel="stylesheet" href="http://www.kopenhagen.com.br/site/css/ie.css" type="text/css" media="screen" />
+        <![endif]-->
+        <script type="text/javascript" src="./KOPENHAGEN.RON.PTV_files/jquery-1.4.2.min.js"></script>
+        
+        <!--<base href="http://www.kopenhagen.com.br/site/lojas.aspx">--><base href=".">
+		<script src="./KOPENHAGEN.RON.PTV_files/maps" type="text/javascript"></script><script src="./KOPENHAGEN.RON.PTV_files/main.js" type="text/javascript"></script><style type="text/css">@media print{.gmnoprint{display:none}}@media screen{.gmnoscreen{display:none}}</style>
+		<script type="text/javascript" src="./KOPENHAGEN.RON.PTV_files/lojas.js"></script>
+        <script type="text/javascript" src="./KOPENHAGEN.RON.PTV_files/cycle.js"></script>
+        <script type="text/javascript" src="./KOPENHAGEN.RON.PTV_files/jquery.jcarousel.min.js"></script>
+        <link rel="stylesheet" href="./KOPENHAGEN.RON.PTV_files/skin-carousel2.css" type="text/css" media="screen">		
+
+		<script type="text/javascript" src="./KOPENHAGEN.RON.PTV_files/jquery-ui-1.8.4.custom.min.js"></script>
+		
+        <script type="text/javascript">
+           $(document).ready(function(){
+        	$("#lojas").tabs();								
+			$('#pgs-lojas').jcarousel({
+                auto: 0,
+                animation: 'slow',
+                easing: 'swing',
+                scroll: 1,
+				buttonNextHTML: '<span id="next-lojas" class="f_r"><a href="#" title="Próxima página"><img src="images/next.jpg" alt="Próximo" /></a></span>',
+				buttonPrevHTML: '<span id="prev-lojas" class="f_l"><a href="#" title="Página anterior"><img src="images/prev.jpg" alt="Anterior" /></a></span>'
+              });
+			  $('#next-lojas').click(function() { 
+					  	var $tabs = $('#lojas').tabs();
+						var selected = $tabs.tabs('option', 'selected');
+					  	$tabs.tabs('select', selected + 1);
+			           return false;
+		    });
+			$('#prev-lojas').click(function() {
+			  	var $tabs = $('#lojas').tabs();
+				var selected = $tabs.tabs('option', 'selected');
+			  	$tabs.tabs('select', selected - 1);
+				return false;
+			});
+          });
+        </script>
+<script type="text/javascript" charset="UTF-8" src="./KOPENHAGEN.RON.PTV_files/vp"></script><script type="text/javascript" charset="UTF-8" src="./KOPENHAGEN.RON.PTV_files/vp(1)"></script><script type="text/javascript" charset="UTF-8" src="./KOPENHAGEN.RON.PTV_files/{mod_drag,mod_ctrapi}.js"></script><script type="text/javascript" charset="UTF-8" src="./KOPENHAGEN.RON.PTV_files/vp(2)"></script></head>
+    <body>
+    <div id="canvas_map"></div>
+        <div id="wrap">
+          <div id="header">
+            
+
+           <div id="main-header">
+             
+<div class="faixa-dourada">&nbsp;</div>
+<a href="http://www.kopenhagen.com.br/site/default.aspx" title="Página Inicial"><img src="./KOPENHAGEN.RON.PTV_files/kopenhagen-logo.jpg" class="logo f_l" alt="Kopenhagen"></a>
+
+    <ul class="main-nav">
+    
+        <li id="ctl00__ctrl_0_rptCategorias_ctl01_genNormal"><a href="http://www.kopenhagen.com.br/site/classicos/" title="Clássicos">Clássicos</a></li>
+                
+    
+        <li id="ctl00__ctrl_0_rptCategorias_ctl02_genNormal"><a href="http://www.kopenhagen.com.br/site/variedades/" title="Variedades">Variedades</a></li>
+                
+    
+        <li id="ctl00__ctrl_0_rptCategorias_ctl03_genNormal"><a href="http://www.kopenhagen.com.br/site/presentes/" title="Presentes">Presentes</a></li>
+                
+    
+        <li id="ctl00__ctrl_0_rptCategorias_ctl04_genNormal"><a href="http://www.kopenhagen.com.br/site/tabletes/" title="Tabletes">Tabletes</a></li>
+                
+    
+        <li id="ctl00__ctrl_0_rptCategorias_ctl05_genNormal"><a href="http://www.kopenhagen.com.br/site/diet/" title="Diet">Diet</a></li>
+                
+    
+        <li id="ctl00__ctrl_0_rptCategorias_ctl06_genNormal"><a href="http://www.kopenhagen.com.br/site/delicias/" title="Delícias">Delícias</a></li>
+                
+    
+        <li id="ctl00__ctrl_0_rptCategorias_ctl07_genNormal"><a href="http://www.kopenhagen.com.br/site/cafeteria/" title="Cafeteria">Cafeteria</a></li>
+                
+                                    
+    
+    </ul><!-- .main-nav -->
+    <div class="divRedesocial">
+    <a href="https://www.facebook.com/ChocolatesKopenhagen" target="_blank" title="Facebook - Kopenhagen"><img alt="" src="./KOPENHAGEN.RON.PTV_files/icon_facebook.png" width="26px" height="26px" class="redesocial"></a>
+    <a href="https://twitter.com/Kopenhagen_" target="_blank" title="Twitter - Kopenhagen"><img alt="" src="./KOPENHAGEN.RON.PTV_files/icon_twitter.png" width="26px" height="26px" class="redesocial"></a>
+    <br><span><img alt="" src="./KOPENHAGEN.RON.PTV_files/sombra.png" class="redesocialSombra"></span>
+    </div>
+    
+    
+             
+             
+            <div id="breadcrumb">
+            	<div class="faixa-dourada">&nbsp;</div>
+                <ul>
+                 <li><a href="http://www.kopenhagen.com.br/site/default.aspx" title="">Página Inicial</a></li>
+                 <li>Nossas lojas</li>
+               </ul>
+           <a href="http://www.kopclub.com.br/" title="KOP CLUB" target="_blank"><img src="./KOPENHAGEN.RON.PTV_files/kopclub-logo.jpg" class="f_r" alt="KOP CLUB"></a>
+         </div><!-- #breadcrumb --></div><!-- #main-header-->
+          </div><!-- #header-->      
+          
+          <div id="container">
+            <div class="content">           
+          	<div class="b_s1">
+			<div class="f_l corpo">
+          		<h1>Nossas Lojas</h1>
+				<p class="page">Hoje a Kopenhagen posiciona-se como o melhor chocolate do país espalhados por 91 cidades de 25 estados, além do Distrito Federal. 
+				Em 84 anos de atividades a marca criou muito mais do que simples receitas e produtos. Acima de tudo, a Kopenhagen escreveu a história de uma marca 
+				consagrada por três gerações de consumidores e que se moderniza continuamente, para antecipar o futuro, sem abrir mão 
+				dos princípios do passado: dedicação, qualidade, tradição. Uma história feita de chocolate!</p>
+				<div id="map-container">
+					<div id="mapa" style="height: 500px; position: relative; background-color: rgb(229, 227, 223);"><div style="position: absolute; left: 0px; top: 0px; overflow: hidden; width: 100%; height: 100%;"><div style="position: absolute; left: 0px; top: 0px; z-index: 0; cursor: url(http://maps.gstatic.com/intl/en_ALL/mapfiles/openhand_8_8.cur) 8 8, default;"><div style="position: absolute; left: 0px; top: 0px; display: none;"><div style="position: absolute; left: 0px; top: 0px; z-index: 0;"><img style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"></div></div><div style="position: absolute; left: 0px; top: 0px;"><div style="position: absolute; left: 0px; top: 0px; z-index: 0;"><img style="position: absolute; left: -145px; top: -171px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: -145px; top: 85px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: -145px; top: 341px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: -145px; top: 597px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 111px; top: -171px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 111px; top: 85px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 111px; top: 341px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 111px; top: 597px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 367px; top: -171px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 367px; top: 85px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 367px; top: 341px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 367px; top: 597px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 623px; top: -171px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 623px; top: 85px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 623px; top: 341px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"><img style="position: absolute; left: 623px; top: 597px; width: 256px; height: 256px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/transparent.png"></div></div><div style="position: absolute; left: 0px; top: 0px; z-index: 100;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 101;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 102;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 103;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 104; cursor: default;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 105;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 106;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 107; cursor: default;"></div></div></div><div class="gmnoprint" style="z-index: 0; position: absolute; left: 2px; bottom: 2px;"><a title="Click to see this area on Google Maps" target="_blank" href="http://maps.google.com/maps?ll=NaN,NaN&spn=NaN,NaN&z=15&key=ABQIAAAAFtvIXhdLRpQ_DVS51OZUoRQjHCLDlC7lyeIouOFCyXWsZv__ABTw_KscUECP2DO1lSeO-ktUvkzXpg&mapclient=jsapi&oi=map_misc&ct=api_logo"><img style="width: 62px; height: 30px; border: 0px; padding: 0px; margin: 0px; cursor: pointer;" src="./KOPENHAGEN.RON.PTV_files/poweredby.png"></a></div><div style="z-index: 0; position: absolute; right: 3px; bottom: 2px; color: black; font-family: Arial, sans-serif; font-size: 11px; white-space: nowrap; text-align: right;" dir="ltr"><span></span><a href="http://www.google.com/intl/en_ALL/help/terms_maps.html" target="_blank" class="gmnoprint terms-of-use-link" style="color: rgb(119, 119, 204);">Terms of Use</a></div><div style="width: 59px; height: 288px; z-index: 0; position: absolute; left: 7px; top: 7px; overflow: hidden; text-align: left;" class="gmnoprint"><div style="position: absolute; left: 0px; top: 0px; width: 59px; height: 62px;"><div style="width: 59px; height: 62px; overflow: hidden; position: absolute; left: 0px; top: 0px;"><img style="position: absolute; left: 0px; top: 0px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/mapcontrols2.png"></div><div style="position: absolute; left: 20px; top: 0px; width: 18px; height: 18px; cursor: pointer;" title="Pan up" log="pan_up"></div><div style="position: absolute; left: 0px; top: 20px; width: 18px; height: 18px; cursor: pointer;" title="Pan left" log="pan_lt"></div><div style="position: absolute; left: 40px; top: 20px; width: 18px; height: 18px; cursor: pointer;" title="Pan right" log="pan_rt"></div><div style="position: absolute; left: 20px; top: 40px; width: 18px; height: 18px; cursor: pointer;" title="Pan down" log="pan_down"></div><div style="position: absolute; left: 20px; top: 20px; width: 18px; height: 18px; cursor: pointer;" title="Return to the last result" log="center_result"></div></div><div style="position: absolute; left: 0px; top: 62px; width: 59px; height: 196px; overflow: hidden; z-index: 1;"><div style="width: 59px; height: 292px; overflow: hidden;"><img style="position: absolute; left: 0px; top: -62px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/mapcontrols2.png"></div><div style="position: absolute; left: 20px; top: 0px; width: 18px; height: 18px; cursor: pointer;" title="Zoom In"></div></div><div style="position: absolute; left: 0px; top: 258px; width: 59px; height: 30px; text-align: left;"><div style="width: 59px; height: 30px; overflow: hidden; position: absolute;"><img style="position: absolute; left: 0px; top: -354px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/mapcontrols2.png"></div><div style="position: absolute; left: 20px; top: 11px; width: 18px; height: 18px; cursor: pointer;" title="Zoom Out"></div></div><div style="position: absolute; left: 19px; top: 86px; width: 22px; height: 182px; z-index: 2; cursor: pointer;"><div style="width: 22px; height: 14px; overflow: hidden; position: absolute; left: 0px; top: 48px; cursor: url(http://maps.gstatic.com/intl/en_ALL/mapfiles/openhand_8_8.cur) 8 8, default;" title="Drag to zoom"><img style="position: absolute; left: 0px; top: -384px; border: 0px; padding: 0px; margin: 0px;" src="./KOPENHAGEN.RON.PTV_files/mapcontrols2.png"></div></div></div><div class="gmnoprint" style="z-index: 0; position: absolute; right: 7px; top: 7px; color: black; font-family: Arial, sans-serif; font-size: small; width: 200px; height: 16px;"><div style="position: absolute; background-color: white; border: 1px solid black; text-align: center; width: 5em; right: 10.2em; cursor: pointer;" title="Show street map"><div style="font-size: 12px; font-weight: bold; border-width: 1px; border-style: solid; border-color: rgb(52, 86, 132) rgb(108, 157, 223) rgb(108, 157, 223) rgb(52, 86, 132);">Map</div></div><div style="position: absolute; background-color: white; border: 1px solid black; text-align: center; width: 5em; right: 5.1em; cursor: pointer;" title="Show satellite imagery"><div style="font-size: 12px; border-width: 1px; border-style: solid; border-color: white rgb(176, 176, 176) rgb(176, 176, 176) white;">Satellite</div></div><div style="position: absolute; background-color: white; border: 1px solid black; text-align: center; width: 5em; right: 0em; cursor: pointer;" title="Show imagery with street names"><div style="font-size: 12px; border-width: 1px; border-style: solid; border-color: white rgb(176, 176, 176) rgb(176, 176, 176) white;">Hybrid</div></div></div></div>
+				</div>
+          	</div><!-- .corpo -->
+            <div class="sidebar d_lojas">
+					<h3>Encontre uma loja perto de você:</h3>
+					<form method="post" action="" id="aspnetForm" class="local-lojas" enctype="multipart/form-data">
+<div>
+<input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="">
+<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="">
+<input type="hidden" name="__LASTFOCUS" id="__LASTFOCUS" value="">
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwULLTE5MzAyOTY0ODEPFgQeCkxPSkFfSU5ERVgCAh4KREFUQV9MT0pBUzKrDgABAAAA/////wEAAAAAAAAADAIAAABBS09QRU5IQUdFTiwgVmVyc2lvbj0xLjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPW51bGwEAQAAAH1TeXN0ZW0uQ29sbGVjdGlvbnMuR2VuZXJpYy5MaXN0YDFbW0tPUEVOSEFHRU4uTG9qYXMuTG9qYSwgS09QRU5IQUdFTiwgVmVyc2lvbj0xLjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPW51bGxdXQMAAAAGX2l0ZW1zBV9zaXplCF92ZXJzaW9uBAAAF0tPUEVOSEFHRU4uTG9qYXMuTG9qYVtdAgAAAAgICQMAAAABAAAAAQAAAAcDAAAAAAEAAAAEAAAABBVLT1BFTkhBR0VOLkxvamFzLkxvamECAAAACQQAAAANAwwFAAAARkVJQ3YzLkZyYW1ld29yaywgVmVyc2lvbj0xLjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPW51bGwFBAAAABVLT1BFTkhBR0VOLkxvamFzLkxvamEMAAAAA19pZAVfbm9tZQlfbGF0aXR1ZGUKX2xvbmdpdHVkZQRfZGRkCV90ZWxlZm9uZQlfbG9qYWNhZmUPX2xvamFzb3J2ZXRlcmlhDV92YWxlcHJlc2VudGUJX2VuZGVyZWNvB19zdGF0dXMQX2xvamFwcm9tb2Npb25hbAABAQEBAQAAAAQEAAgBAQEjRUlDdjMuRnJhbWV3b3JrLkxvY2FsaWRhZGUuRW5kZXJlY28FAAAAFkVJQ3YzLkZyYW1ld29yay5TdGF0dXMFAAAAAQIAAAANAQAABgYAAAALUG9ydG8gVmVsaG8GBwAAAAAJBwAAAAYIAAAAAjY5BgkAAAAIMzIxODg1MzABAAEJCgAAAAkLAAAAAQUKAAAAI0VJQ3YzLkZyYW1ld29yay5Mb2NhbGlkYWRlLkVuZGVyZWNvBwAAAANfaWQHX2NpZGFkZQRfY2VwB19iYWlycm8LX2xvZ3JhZG91cm8HX251bWVybwxfY29tcGxlbWVudG8ABAEBAQEBCCFFSUN2My5GcmFtZXdvcmsuTG9jYWxpZGFkZS5DaWRhZGUFAAAABQAAAGwrAAAJDAAAAAYNAAAACDc4OTA1NDUwBg4AAAAVRmxvcmFsZG8gUG9udGVzIFBpbnRvBg8AAAATQXZlbmlkYSBSaW8gTWFkZWlyYQYQAAAABDMyODgGEQAAABJTYWxhIDItNy8yIFBpc28gMiAFCwAAABZFSUN2My5GcmFtZXdvcmsuU3RhdHVzBAAAAANfaWQFX25vbWUEX2NvcgdfaW1hZ2VtAAEBAQcFAAAAAQAGEgAAAAVBdGl2bwYTAAAABjAwMDBGRgYUAAAACWF0aXZvLmdpZgUMAAAAIUVJQ3YzLkZyYW1ld29yay5Mb2NhbGlkYWRlLkNpZGFkZQQAAAADX2lkBV9ub21lB19lc3RhZG8HX3N0YXR1cwABBAQIIUVJQ3YzLkZyYW1ld29yay5Mb2NhbGlkYWRlLkVzdGFkbwUAAAAWRUlDdjMuRnJhbWV3b3JrLlN0YXR1cwUAAAAFAAAAQBoAAAYVAAAAC1BvcnRvIFZlbGhvCRYAAAAJCwAAAAUWAAAAIUVJQ3YzLkZyYW1ld29yay5Mb2NhbGlkYWRlLkVzdGFkbwYAAAADX2lkBV9ub21lBl9zaWdsYQVfcGFpcwdfcmVnaWFvB19zdGF0dXMAAQEEBAQHH0VJQ3YzLkZyYW1ld29yay5Mb2NhbGlkYWRlLlBhaXMFAAAAIUVJQ3YzLkZyYW1ld29yay5Mb2NhbGlkYWRlLlJlZ2lhbwUAAAAWRUlDdjMuRnJhbWV3b3JrLlN0YXR1cwUAAAAFAAAAFgAGGAAAAAlSb25kw7RuaWEGGQAAAAJSTwkaAAAACRsAAAAJCwAAAAUaAAAAH0VJQ3YzLkZyYW1ld29yay5Mb2NhbGlkYWRlLlBhaXMFAAAAA19pZAVfbm9tZQZfc2lnbGEOX25hY2lvbmFsaWRhZGUHX3N0YXR1cwABAQEEBxZFSUN2My5GcmFtZXdvcmsuU3RhdHVzBQAAAAUAAAAaAAYdAAAABkJyYXNpbAoKCQsAAAAFGwAAACFFSUN2My5GcmFtZXdvcmsuTG9jYWxpZGFkZS5SZWdpYW8EAAAAA19pZAVfbm9tZQVfcGFpcwdfc3RhdHVzAAEEBAcfRUlDdjMuRnJhbWV3b3JrLkxvY2FsaWRhZGUuUGFpcwUAAAAWRUlDdjMuRnJhbWV3b3JrLlN0YXR1cwUAAAAFAAAAAwAGHwAAAAVOb3J0ZQkgAAAACQsAAAABIAAAABoAAAABAAYiAAAADEFmZWdhbmlzdMOjbwoKCQsAAAALFgJmD2QWAgIFD2QWCGYPZBYEAgMPEA8WAh4LXyFEYXRhQm91bmRnZA8WGQIBAgICAwIEAgUCBgIHAggCCQIKAgsCDAINAg4CDwIQAhECEgITAhQCFQIWAhcCGAIZFhkQBQdBbGFnb2FzBQEyZxAFCEFtYXpvbmFzBQE0ZxAFBUJhaGlhBQE1ZxAFBkNlYXLDoQUBNmcQBRBEaXN0cml0byBGZWRlcmFsBQE3ZxAFDkVzcGlyaXRvIFNhbnRvBQE4ZxAFBkdvacOhcwUBOWcQBQlNYXJhbmjDo28FAjEwZxAFC01hdG8gR3Jvc3NvBQIxMWcQBRJNYXRvIEdyb3NzbyBkbyBTdWwFAjEyZxAFDE1pbmFzIEdlcmFpcwUCMTNnEAUFUGFyw6EFAjE0ZxAFCFBhcmHDrWJhBQIxNWcQBQdQYXJhbsOhBQIxNmcQBQpQZXJuYW1idWNvBQIxN2cQBQZQaWF1w60FAjE4ZxAFDlJpbyBkZSBKYW5laXJvBQIxOWcQBRNSaW8gR3JhbmRlIGRvIE5vcnRlBQIyMGcQBRFSaW8gR3JhbmRlIGRvIFN1bAUCMjFnEAUJUm9uZMO0bmlhBQIyMmcQBQdSb3JhaW1hBQIyM2cQBQ5TYW50YSBDYXRhcmluYQUCMjRnEAUKU8OjbyBQYXVsbwUCMjVnEAUHU2VyZ2lwZQUCMjZnEAUJVG9jYW50aW5zBQIyN2cWAQIUZAIHDxBkEBUCCVNlbGVjaW9uZQtQb3J0byBWZWxobxUCATAENjcyMBQrAwJnZxYBAgFkAgEPFgIeC18hSXRlbUNvdW50AgEWAgIBD2QWAmYPFQMBMAExATFkAgIPFgIfAwIBFgJmD2QWBGYPFQEBMGQCAQ8WAh8DAgEWAmYPZBYCZg8VDgMyNjkJcHJpbmNpcGFsATELUG9ydG8gVmVsaG8TQXZlbmlkYSBSaW8gTWFkZWlyYQQzMjg4FUZsb3JhbGRvIFBvbnRlcyBQaW50bwtQb3J0byBWZWxobwJSTyZDb21wbGVtZW50bzogU2FsYSAyLTcvMiBQaXNvIDIgIDxiciAvPgg3ODkwNTQ1MAI2OQgzMjE4ODUzMNUBPGRpdiBjbGFzcz0nc2Vydmljb3MnPjx1bD48bGk+PGltZyBzcmM9J2h0dHA6Ly93d3cua29wZW5oYWdlbi5jb20uYnIvc2l0ZS9pbWFnZXMvZ2lmdC5naWYnIGFsdD0nUHJlc2VudGVzJyAvPjwvbGk+PGxpPjxpbWcgc3JjPSdodHRwOi8vd3d3LmtvcGVuaGFnZW4uY29tLmJyL3NpdGUvaW1hZ2VzL2NvZmYuZ2lmJyBhbHQ9J0NhZmV0ZXJpYScgLz48L2xpPjwvdWw+PC9kaXY+ZAIEDxYCHgRUZXh0BYABPHNjcmlwdCB0eXBlPSd0ZXh0L2phdmFzY3JpcHQnPnNob3dNYXAoJycsJycsICcnLCAnJywgJycsICcnLCAnaHR0cDovL3d3dy5rb3BlbmhhZ2VuLmNvbS5ici9zaXRlL2ltYWdlcy9pY29uX21hcC5wbmcnKTs8L3NjcmlwdD5kZA/XN4FYLsc/bTIe4Dlm3OzzdB3F">
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+var theForm = document.forms['aspnetForm'];
+if (!theForm) {
+    theForm = document.aspnetForm;
+}
+function __doPostBack(eventTarget, eventArgument) {
+    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
+        theForm.__EVENTTARGET.value = eventTarget;
+        theForm.__EVENTARGUMENT.value = eventArgument;
+        theForm.submit();
+    }
+}
+//]]>
+</script>
+
+
+						<label for="ctl00_MainContent_ddlEstado" id="ctl00_MainContent_lblEstado">Estado  *</label>
+                        <select name="ctl00$MainContent$ddlEstado" onchange="javascript:setTimeout(&#39;__doPostBack(\&#39;ctl00$MainContent$ddlEstado\&#39;,\&#39;\&#39;)&#39;, 0)" id="ctl00_MainContent_ddlEstado">
+	<option value="0">Selecione</option>
+	<option value="2">Alagoas</option>
+	<option value="4">Amazonas</option>
+	<option value="5">Bahia</option>
+	<option value="6">Ceará</option>
+	<option value="7">Distrito Federal</option>
+	<option value="8">Espirito Santo</option>
+	<option value="9">Goiás</option>
+	<option value="10">Maranhão</option>
+	<option value="11">Mato Grosso</option>
+	<option value="12">Mato Grosso do Sul</option>
+	<option value="13">Minas Gerais</option>
+	<option value="14">Pará</option>
+	<option value="15">Paraíba</option>
+	<option value="16">Paraná</option>
+	<option value="17">Pernambuco</option>
+	<option value="18">Piauí</option>
+	<option value="19">Rio de Janeiro</option>
+	<option value="20">Rio Grande do Norte</option>
+	<option value="21">Rio Grande do Sul</option>
+	<option selected="selected" value="22">Rondônia</option>
+	<option value="23">Roraima</option>
+	<option value="24">Santa Catarina</option>
+	<option value="25">São Paulo</option>
+	<option value="26">Sergipe</option>
+	<option value="27">Tocantins</option>
+
+</select><br>
+						
+						<label for="ctl00_MainContent_ddlCidade" id="ctl00_MainContent_lblCidade">Cidade  *</label>
+                        <select name="ctl00$MainContent$ddlCidade" onchange="javascript:setTimeout(&#39;__doPostBack(\&#39;ctl00$MainContent$ddlCidade\&#39;,\&#39;\&#39;)&#39;, 0)" id="ctl00_MainContent_ddlCidade">
+	<option value="0">Selecione</option>
+	<option selected="selected" value="6720">Porto Velho</option>
+
+</select><br>
+                    </form>
+					
+				<div id="lojas" class="lojas ui-tabs ui-widget ui-widget-content ui-corner-all">
+				    
+					<div id="nav-lojas">
+							<div class=" jcarousel-skin-tango"><div class="jcarousel-container jcarousel-container-horizontal" style="position: relative; display: block;"><div class="jcarousel-clip jcarousel-clip-horizontal" style="overflow: hidden; position: relative;"><ul id="pgs-lojas" class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all jcarousel-list jcarousel-list-horizontal" style="overflow: hidden; position: relative; top: 0px; margin: 0px; padding: 0px; left: 0px; width: 142px;">
+					
+								<li class="ui-state-default ui-corner-top ui-tabs-selected ui-state-active jcarousel-item jcarousel-item-horizontal jcarousel-item-1 jcarousel-item-1-horizontal" style="float: left; list-style: none;" jcarouselindex="1"><a href="http://www.kopenhagen.com.br/site/lojas.aspx#p0" title="Página 1">1</a></li>
+					
+							</ul></div><span id="prev-lojas" class="f_l jcarousel-prev jcarousel-prev-horizontal jcarousel-prev-disabled jcarousel-prev-disabled-horizontal" style="display: block;" disabled="true"><a href="http://www.kopenhagen.com.br/site/lojas.aspx#" title="Página anterior"><img src="./KOPENHAGEN.RON.PTV_files/prev.jpg" alt="Anterior"></a></span><span id="next-lojas" class="f_r jcarousel-next jcarousel-next-horizontal jcarousel-next-disabled jcarousel-next-disabled-horizontal" style="display: block;" disabled="true"><a href="http://www.kopenhagen.com.br/site/lojas.aspx#" title="Próxima página"><img src="./KOPENHAGEN.RON.PTV_files/next.jpg" alt="Próximo"></a></span></div></div>
+					</div><!-- #nav-lojas-->
+					
+					
+					
+					<div id="p0" class="pagina ui-tabs-panel ui-widget-content ui-corner-bottom">
+						<ul class="end-loja">
+						
+						    <li id="loja-269" class="principal"><span class="nr-loja">1</span><span class="title-end-loja">Porto Velho</span>
+							<p>Avenida Rio Madeira, 3288 - Floraldo Pontes Pinto - Porto Velho/RO <br> Complemento: Sala 2-7/2 Piso 2  <br> CEP: 78905450 Tel: (69) 32188530</p>
+							<div class="servicos"><ul><li><img src="./KOPENHAGEN.RON.PTV_files/gift.gif" alt="Presentes"></li><li><img src="./KOPENHAGEN.RON.PTV_files/coff.gif" alt="Cafeteria"></li></ul></div>
+							</li>
+						
+						</ul>							
+					</div>
+						
+				</div><!-- .lojas-->
+			
+			<script type="text/javascript">showMap('','', '', '', '', '', 'http://www.kopenhagen.com.br/site/images/icon_map.png');</script>
+            </div><!-- .sidebar -->
+			</div>
+
+          
+          
+
+<div class="acesso-rapido">
+  <div class="acesso-title"><span>Acesso Rápido</span></div>
+  <div class="f_l mail-fone">
+    <h2 class="f_l w_100">Dúvidas e sugestões?</h2>
+    <p class="f_l">Entre em contato conosco pelo e-mail <br><span class="golden"><a title="E-mail SAC" href="mailto:sac@kopenhagen.com.br">sac@kopenhagen.com.br</a></span></p>
+    
+    <p class="f_l call-for">Ou ligue para <br><span class="golden">0800-100678</span></p>
+  </div>
+  <div class="map-nav f_r">
+    <div class="nav-produtos">
+      <h2 class="f_l w_100">Produtos</h2>
+      
+      <ul>
+      
+        <li id="ctl00__ctrl_1_rptProdutosEsquerda_ctl01_genNormal"><a href="http://www.kopenhagen.com.br/site/classicos/" title="Clássicos">Clássicos</a></li>
+        
+      
+        <li id="ctl00__ctrl_1_rptProdutosEsquerda_ctl02_genNormal"><a href="http://www.kopenhagen.com.br/site/presentes/" title="Presentes">Presentes</a></li>
+        
+      
+        <li id="ctl00__ctrl_1_rptProdutosEsquerda_ctl03_genNormal"><a href="http://www.kopenhagen.com.br/site/diet/" title="Diet">Diet</a></li>
+        
+      
+        <li id="ctl00__ctrl_1_rptProdutosEsquerda_ctl04_genNormal"><a href="http://www.kopenhagen.com.br/site/cafeteria/" title="Cafeteria">Cafeteria</a></li>
+        
+      
+      </ul>
+      
+      
+      <ul>
+      
+        <li id="ctl00__ctrl_1_rptProdutosDireita_ctl01_genNormal"><a href="http://www.kopenhagen.com.br/site/variedades/" title="Variedades">Variedades</a></li>
+        
+      
+        <li id="ctl00__ctrl_1_rptProdutosDireita_ctl02_genNormal"><a href="http://www.kopenhagen.com.br/site/tabletes/" title="Tabletes">Tabletes</a></li>
+        
+      
+        <li id="ctl00__ctrl_1_rptProdutosDireita_ctl03_genNormal"><a href="http://www.kopenhagen.com.br/site/delicias/" title="Delícias">Delícias</a></li>
+        
+      
+      </ul>
+      
+    </div><!-- .nav-produtos-->
+    
+    <div class="nav-empresa">
+      <h2 class="f_l w_100">A Kopenhagen</h2>
+      <ul>
+        <li><a href="http://www.kopenhagen.com.br/site/a-kopenhagen/" title="Sobre Nós">Sobre Nós</a></li>
+        <li><a href="./KOPENHAGEN.RON.PTV_files/KOPENHAGEN.RON.PTV.html" title="Nossas Lojas">Nossas Lojas</a></li>
+        <li><a href="http://www.kopenhagen.com.br/site/franquias/" title="Franquias">Franquias</a></li>
+        <li><a href="http://www.kopenhagen.com.br/site/kop-to-company/" title="">Kop to Company</a></li>
+        <li class="d_n"><a href="http://www.kopclub.com.br/" title="KopClub" target="_blank">KopClub</a></li>
+      </ul>
+    </div><!-- .nav-empresa-->
+    <div class="nav-servicos">
+      <h2 class="f_l w_100">Serviços</h2>
+      <ul>
+        <li><a href="http://www.kopenhagen.com.br/site/fale-conosco/" title="Fale Conosco">Fale Conosco</a></li>
+        <li><a href="http://www.kopenhagen.com.br/portal/" title="Portal do Franqueado" target="_blank">Portal do Franqueado</a></li>
+        <li><a href="http://acesso.kopenhagen.com.br/Recrutamento/rspLogin.htm" target="_blank" title="Trabalhe Conosco">Trabalhe conosco</a></li>
+      </ul>
+    </div><!-- .nav-servicos-->
+  </div><!-- .map-nav-->
+</div><!-- .acesso-rapido-->
+         
+          
+            </div><!-- .content -->          
+          </div><!-- #container-->
+           
+
+<div class="nav-resume">
+    <ul>
+        <li><a href="http://www.kopenhagen.com.br/site/a-kopenhagen/" title="A Kopenhagen">A Kopenhagen</a></li>
+        <li><a href="./KOPENHAGEN.RON.PTV_files/KOPENHAGEN.RON.PTV.html" title="Nossas Lojas">Nossas Lojas</a></li>
+		<li><a href="http://www.kopenhagen.com.br/site/nossas-lojas-promocionais" title="Nossas Lojas Promocionais">Nossas Lojas Promocionais</a></li>    
+        <li><a href="http://www.kopenhagen.com.br/site/noticias/" title="Notícias">Notícias</a></li>
+        <li><a href="http://www.kopenhagen.com.br/site/kop-to-company/" title="Kop to Company">Kop to Company</a></li>
+        <li><a href="http://www.kopenhagen.com.br/site/franquias/" title="Franquias">Franquias</a></li>
+        <li><a href="http://www.kopenhagen.com.br/site/fale-conosco/" title="Fale Conosco">Fale Conosco</a></li>
+        <li><a href="http://www3.catho.com.br/empregos/grupocrmkopenhagen/" title="Trabalhe Conosco" target="_blank">Trabalhe Conosco</a></li>
+        
+    </ul>
+    
+</div><!-- .nav-resume-->
+          
+
+<div id="footer">
+    <div class="copyright" style="width:996px"><p>© Chocolates Kopenhagen. Todos os Direitos Reservados Site melhor visualizado em 1024X768 Pixels.</p>
+      <ul>
+        <li><a href="http://www.kopenhagen.com.br/site/default.aspx" title="Página Inicial">Home</a></li>
+        <li><a href="http://www.kopenhagen.com.br/site/politica-privacidade/" title="Politica de Privacidade">Politica de Privacidade</a></li>
+        <li><a href="http://www.kopenhagen.com.br/site/noticias/" title="Sala de Imprensa">Sala de Imprensa</a></li>
+      </ul>
+      <p style="float:right">Desenvolvido por <a href="http://www.focusnetworks.com.br/" target="_blank" style="color:#D4BA6A" title="Focusnetworks">Focusnetworks</a>.</p>
+    </div><!-- .copyright -->
+    <div class="social f_r d_n">
+      <img src="./KOPENHAGEN.RON.PTV_files/kopenhagen-minilogo.jpg" alt="Kopenhagen" class="minilogo">
+      <ul class="f_r">
+        <li><a href="http://www.kopenhagen.com.br/site/lojas.aspx#" title="">Twitter</a></li>
+        <li><a href="http://www.kopenhagen.com.br/site/lojas.aspx#" title="">Facebook</a></li>
+        <li><a href="http://www.kopenhagen.com.br/site/lojas.aspx#" title="">Digg</a></li>
+      </ul>
+    </div>
+    <br>
+    <br>
+    <div class="faixa-dourada">&nbsp;</div>
+</div><!-- #footer -->
+        </div><!-- #wrap -->
+		   
+           
+        <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+        </script><script src="./KOPENHAGEN.RON.PTV_files/ga.js" type="text/javascript"></script>
+        <script type="text/javascript">
+        try {
+            var pageTracker = _gat._getTracker("UA-3847601-1");
+            pageTracker._trackPageview();
+            pageTracker._trackPageLoadTime();
+        } catch(err) {}
+        </script>
+    
+</body></html>
