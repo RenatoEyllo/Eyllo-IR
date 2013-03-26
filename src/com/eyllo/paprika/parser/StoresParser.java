@@ -3,7 +3,6 @@ package com.eyllo.paprika.parser;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -50,7 +49,7 @@ public class StoresParser {
    * Parsing the Kopenhagen web site directory
    * @throws Exception
    */
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   public void parseKopenhagen(String pUrl) throws Exception {
     //String url = DEFAULT_KOPENHAGEN_URL;
     String baseUri = "http://www.kopenhagen.com.br/site/nossas-lojas/";
@@ -147,6 +146,9 @@ public class StoresParser {
     }// ENDFOR 
   }
 
+  /**
+   * Parsing LojasAmericanas Brazilian retail store
+   */
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public void parseLojasAmericanas(){
     LOGGER.info("Cleaning objects to re-fill them with new data");
@@ -235,6 +237,10 @@ public class StoresParser {
     
   }
   
+  /**
+   * Parsing Kopenhagen Brasil Store files
+   * @param pPath
+   */
   public void parseKopenhagenBrasil(String pPath){
     LOGGER.info("Cleaning objects to re-fill them with new data");
     this.jsonObjects.clear();
@@ -253,7 +259,12 @@ public class StoresParser {
     }
   }
 
-  @SuppressWarnings("unchecked")
+  /**
+   * Method to build a JSONObject from a HashMap
+   * @param pJsonData
+   * @return
+   */
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   private JSONObject getJsonObj(HashMap pJsonData){
     JSONObject jsonObj = new JSONObject();
     jsonObj.putAll(pJsonData);
