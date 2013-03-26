@@ -1,8 +1,12 @@
 package com.eyllo.paprika.parser;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,13 +32,15 @@ public class StoresParser {
 
   private List<JSONObject> jsonObjects;
   
-  private static String DEFAULT_KOPENHAGEN_URL = "/Users/renatomarroquin/Documents/workspace/workspaceCompanies/PaprikaIR/res/kopenhagen/";
+  private static String DEFAULT_KOPENHAGEN_URL = "/Users/renatomarroquin/Documents/workspace/workspaceCompanies/Eyllo-IR/res/kopenhagen/";
   
   private static String DEFAULT_LOJAS_AMERICANAS_URL = "http://ri.lasa.com.br/lojas/iframe?estado=";
   
+  private static String DEFAULT_ENCODING = "UTF-8";
+
   private static Logger LOGGER = LoggerFactory.getLogger(StoresParser.class);
   
-  private int scenarioId = 1;
+  private int scenarioId = 6;
   
   public StoresParser(){
     this.jsonObjects = new ArrayList<JSONObject>();
@@ -84,7 +90,7 @@ public class StoresParser {
           Elements liElements = divNode.select("li");
           for(Element liElement : liElements){
             // Getting the actual stores
-            results.put("userId", userId);
+            results.put("userId", Integer.parseInt(userId));
             results.put("type", recordType);
             results.put("title", storeName);
             if (liElement.attr("id").length() > 4)
@@ -111,7 +117,7 @@ public class StoresParser {
                     results.put("infobox", infoBox);
                     infoBox = new HashMap();
                     results.put("scenarioId", scenarioId);
-                    scenarioId++;
+                    //scenarioId++;
                     this.jsonObjects.add(this.getJsonObj(results));
                     results = new HashMap();
                   }
@@ -122,8 +128,8 @@ public class StoresParser {
                       LOGGER.debug("addressInfo- " + addressInfo[iCnt].trim());
                       if (iCnt == 0) {
                         gcc.geoCodeAddress(addressInfo[iCnt]);
-                        location.put("latitude", gcc.getLatitude());
-                        location.put("longitude", gcc.getLongitude());
+                        location.put("lat", gcc.getLatitude());
+                        location.put("lng", gcc.getLongitude());
                         //addressInfo[iCnt] = gcc.getFormattedAddress();
                       }
                       infoBoxText = infoBoxText + addressInfo[iCnt] + "<br />";
@@ -179,7 +185,7 @@ public class StoresParser {
             // List of stores
             Elements liElements = div.select("li");
             for (Element liStore : liElements){
-              results.put("userId", userId);
+              results.put("userId", Integer.parseInt(userId));
               results.put("type", recordType);
               results.put("title", storeName);
               results.put("scenarioId", scenarioId);
@@ -195,15 +201,15 @@ public class StoresParser {
               results.put("infobox", infoBox);
               
               gcc.geoCodeAddress(storeAddress);
-              location.put("latitude", gcc.getLatitude());
-              location.put("longitude", gcc.getLongitude());
+              location.put("lat", gcc.getLatitude());
+              location.put("lng", gcc.getLongitude());
               results.put("location", location);
               
               this.jsonObjects.add(this.getJsonObj(results));
               results = new HashMap();
               location = new HashMap();
               infoBox = new HashMap();
-              scenarioId++;
+              //scenarioId++;
               
               //System.out.println("StoreNewAddress: " + gcc.getFormattedAddress());
               //System.out.println("Latitude: " + gcc.getLatitude());
@@ -254,17 +260,20 @@ public class StoresParser {
     return jsonObj;
   }
 
+  /**
+   * Write JSON objects into files
+   * @param pFilePath
+   */
   private void writeJsonObj(String pFilePath){
+    Writer fileWriter = null;
     try {
-      
-      FileWriter file = new FileWriter(pFilePath, true);
+      fileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(pFilePath), DEFAULT_ENCODING));
       for (JSONObject jsonObj: this.jsonObjects)
-        file.write(jsonObj.toJSONString());
-      file.flush();
-      file.close();
-   
+        fileWriter.write(jsonObj.toJSONString());
+      fileWriter.close();
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
+
 }
