@@ -1,8 +1,10 @@
 package com.eyllo.paprika.ir;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.eyllo.paprika.html.elements.Link;
 
@@ -22,7 +24,16 @@ public class Entity {
    */
   @Override
   public String toString(){
-    return this.toString();
+    StringBuilder strBuilder = new StringBuilder();
+    Iterator<Entry<String, Object>> it = properties.entrySet().iterator();
+    while (it.hasNext()) {
+        Map.Entry<String, Object> pairs = (Map.Entry<String, Object>)it.next();
+        strBuilder.append(pairs.getKey()).append(":");
+        strBuilder.append(pairs.getValue()==null?"":pairs.getValue().toString()).append("\n");
+        //System.out.println(pairs.getKey() + " = " + pairs.getValue());
+        it.remove(); // avoids a ConcurrentModificationException
+    }
+    return strBuilder.toString();
   }
 
   /**
@@ -44,10 +55,9 @@ public class Entity {
    * @param properties the properties to set
    */
   public void setProperties(String pProperty, Object pObject) {
-    Object obj = properties.get(pProperty);
-    if (obj != null)
-      obj = pObject.toString() + obj.toString();
-    this.properties.put(pProperty, obj);
+    if (properties.get(pProperty) != null)
+      pObject = properties.get(pProperty).toString() + EntityUtils.VALUE_SEP + pObject.toString();
+    this.properties.put(pProperty, pObject);
   }
 
   /**

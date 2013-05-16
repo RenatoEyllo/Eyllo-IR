@@ -5,6 +5,14 @@ import java.util.Map;
 
 public class EntityUtils {
 
+  /**
+   * Variable used to separate values within an entity's property
+   */
+  public static String VALUE_SEP = " ";
+
+  /**
+   * Entity's properties
+   */
   public static String ABSTRACT = "abstract";
   public static String ASSETS = "assets";
   public static String COMMENT = "comment";
