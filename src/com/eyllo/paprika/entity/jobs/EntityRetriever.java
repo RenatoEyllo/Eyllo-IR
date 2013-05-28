@@ -6,7 +6,7 @@ package com.eyllo.paprika.entity.jobs;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bingmaps.rest.models.Confidence;
+//import org.bingmaps.rest.models.Confidence;
 
 import com.eyllo.paprika.entity.Entity;
 import com.eyllo.paprika.entity.EntityUtils;

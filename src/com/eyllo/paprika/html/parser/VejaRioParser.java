@@ -3,7 +3,7 @@
  */
 package com.eyllo.paprika.html.parser;
 
-import java.io.File;
+//import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -35,7 +35,7 @@ public class VejaRioParser {
   /**
    * Default encoding for reading portuguese pages
    */
-  private static String DEFAULT_ENCODING = "UTF-8";//"ISO-8859-1"
+  //private static String DEFAULT_ENCODING = "UTF-8";//"ISO-8859-1"
   
   public static String INFO_SEP = " - ";
   private static String DEFAULT_VJR_URL = "http://vejario.abril.com.br/";
@@ -203,7 +203,7 @@ public class VejaRioParser {
   public void parseSearchResults(String pUrl){
     LOGGER.info("Starting to parse data from " + pUrl);
     Document doc = null;
-    File input;
+    //File input;
 
     try {
       //input = new File(DEFAULT_VJR_DOC);
