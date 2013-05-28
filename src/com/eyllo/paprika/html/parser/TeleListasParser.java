@@ -1,4 +1,4 @@
-package com.eyllo.paprika.parser;
+package com.eyllo.paprika.html.parser;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,9 +13,9 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eyllo.paprika.html.elements.Link;
-import com.eyllo.paprika.ir.Entity;
-import com.eyllo.paprika.ir.EntityUtils;
+import com.eyllo.paprika.entity.Entity;
+import com.eyllo.paprika.entity.EntityUtils;
+import com.eyllo.paprika.entity.elements.EylloLink;
 
 public class TeleListasParser {
 
@@ -24,8 +24,14 @@ public class TeleListasParser {
   private static String DEFAULT_TL_URL = "http://www.telelistas.net/rj/rio+de+janeiro/lanchonetes+restaurantes/?pagina=1";
   private static String DEFAULT_TL_DOC = "/Users/renatomarroquin/Documents/workspace/workspaceCompanies/Eyllo-IR/res/tl/Lanchonetes(Restaurantes)-RJTeleListas.net.html";
   
+  /**
+   * Default encoding for reading portuguese pages
+   */
   private static String DEFAULT_ENCODING = "ISO-8859-1";//"UTF-8"
 
+  /**
+   * Logger to help us write write info/debug/error messages
+   */
   private static Logger LOGGER = LoggerFactory.getLogger(TeleListasParser.class);
   
   /**
@@ -88,16 +94,20 @@ public class TeleListasParser {
     LOGGER.info("Finished parsing.");
 
     LOGGER.info("Printing entities collected.");
-    for (Entity ent : entities)
-      System.out.println(ent.toString());
+    ParseUtils.printEntities(entities);
   }
 
+  /**
+   * Detects if the text we are looking at has the home page link
+   * @param pEntity
+   * @param pInfoElement
+   */
   public void detectHomePage(Entity pEntity, Element pInfoElement){
     if (pInfoElement.className().toString().equals("ib_ser"))
       for (Element child : pInfoElement.children()){
         if (!child.toString().equals("")){
           if (pEntity.getProperties(EntityUtils.HOME_PAGE) == null){
-            Link mainSite = detectUrl(child);
+            EylloLink mainSite = ParseUtils.detectUrl(child);
             if (mainSite.getLinkText().equals("site"))
               pEntity.setProperties(EntityUtils.HOME_PAGE, getHomePageLink(mainSite.getLinkHref()));
           }
@@ -127,7 +137,7 @@ public class TeleListasParser {
       for (Element child : pInfoElement.children()){
         //System.out.println("+"+child.getAllElements().toString());
         // Detect URL to create main URL which contains the main name of the entity
-        Link tmpLink = detectUrl(child);
+        EylloLink tmpLink = ParseUtils.detectUrl(child);
         if (tmpLink != null){
           pEntity.setProperties(EntityUtils.NAME, tmpLink.getLinkText());
           pEntity.addLink(tmpLink);
@@ -161,21 +171,6 @@ public class TeleListasParser {
       phone = pText.replace("Tel:", "").trim();
     if (!phone.equals(""))
       pEntity.setProperties(EntityUtils.PHONES, phone);
-  }
-  /**
-   * Detects if an element is a link and returns the object if it is
-   * @param pElement
-   * @return
-   */
-  public Link detectUrl(Element pElement){
-    Link tmpLink = null;
-    if (pElement.tagName().equals("a")){
-      tmpLink = new Link();
-      tmpLink.setLinkHref(pElement.attr("href")); // "http://example.com/"
-      tmpLink.setLinkText(pElement.text()); // "example""
-      tmpLink.setLink(pElement);
-    }
-    return tmpLink;
   }
 
   /**

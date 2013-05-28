@@ -1,4 +1,4 @@
-package com.eyllo.paprika.parser;
+package com.eyllo.paprika.html.parser;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -19,8 +19,6 @@ import org.jsoup.nodes.Entities.EscapeMode;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.eyllo.paprika.external.api.GoogleGeocoding;
 
 /**
  * 
@@ -64,8 +62,10 @@ public class StoresParser {
     String infoBoxText = "";
 
     File input;
+    /**
+     * GoogleGeocoder gcc =  new GoogleGeocoder();
+     */
     
-    GoogleGeocoding gcc =  new GoogleGeocoding();
     
     // Getting the file to be parsed
     input = new File(pUrl);
@@ -117,7 +117,7 @@ public class StoresParser {
                     infoBox = new HashMap();
                     results.put("scenarioId", scenarioId);
                     //scenarioId++;
-                    this.jsonObjects.add(this.getJsonObj(results));
+                    this.jsonObjects.add(ParseUtils.getJsonObj(results));
                     results = new HashMap();
                   }
                   // Handling the address
@@ -126,9 +126,12 @@ public class StoresParser {
                     for (int iCnt = 0; iCnt < addressInfo.length; iCnt++){
                       LOGGER.debug("addressInfo- " + addressInfo[iCnt].trim());
                       if (iCnt == 0) {
-                        gcc.geoCodeAddress(addressInfo[iCnt]);
-                        location.put("lat", gcc.getLatitude());
-                        location.put("lng", gcc.getLongitude());
+                      /**
+                       *   gcc.geoCodeAddress(addressInfo[iCnt]);
+                       *   location.put("lat", gcc.getLatitude());
+                       *   location.put("lng", gcc.getLongitude());
+                       */
+                        
                         //addressInfo[iCnt] = gcc.getFormattedAddress();
                       }
                       infoBoxText = infoBoxText + addressInfo[iCnt] + "<br />";
@@ -156,14 +159,18 @@ public class StoresParser {
     LOGGER.info("Getting LojasAmericanas");
     String[] brStates = {"MG", "RJ","AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","PA","PB","PR","PE","PI","RN","RS","RO","RR","SC","SP","SE","TO"};
     HashMap results = new HashMap();
-    HashMap location = new HashMap();
+    /**
+     * HashMap location = new HashMap();
+     */
     HashMap infoBox = new HashMap();
     
     String userId = "2";
     String recordType = "text";
     String storeName = "LojasAmericanas";
     
-    GoogleGeocoding gcc = new GoogleGeocoding();
+    /**
+     * GoogleGeocoder gcc = new GoogleGeocoder();
+     */
     
     try {
       for(String state : brStates){
@@ -202,14 +209,19 @@ public class StoresParser {
               infoBox.put("text", storeAddress);
               results.put("infobox", infoBox);
               
-              gcc.geoCodeAddress(storeAddress);
-              location.put("lat", gcc.getLatitude());
-              location.put("lng", gcc.getLongitude());
-              results.put("location", location);
+              /**
+               * gcc.geoCodeAddress(storeAddress);
+               * location.put("lat", gcc.getLatitude()); 
+               * location.put("lng", gcc.getLongitude()); 
+               * results.put("location", location);
+               */
               
-              this.jsonObjects.add(this.getJsonObj(results));
+              
+              this.jsonObjects.add(ParseUtils.getJsonObj(results));
               results = new HashMap();
-              location = new HashMap();
+              /**
+               * location = new HashMap();
+               */
               infoBox = new HashMap();
               //scenarioId++;
               
@@ -257,18 +269,6 @@ public class StoresParser {
       LOGGER.error("Error while parsing Kopenhagen pages");
       e.printStackTrace();
     }
-  }
-
-  /**
-   * Method to build a JSONObject from a HashMap
-   * @param pJsonData
-   * @return
-   */
-  @SuppressWarnings({ "unchecked", "rawtypes" })
-  private JSONObject getJsonObj(HashMap pJsonData){
-    JSONObject jsonObj = new JSONObject();
-    jsonObj.putAll(pJsonData);
-    return jsonObj;
   }
 
   /**
