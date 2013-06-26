@@ -94,7 +94,7 @@ public class TeleListasParser {
     LOGGER.info("Finished parsing.");
 
     LOGGER.info("Printing entities collected.");
-    ParseUtils.printEntities(entities);
+    //ParseUtils.printEntities(entities);
   }
 
   /**

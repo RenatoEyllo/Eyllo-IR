@@ -72,8 +72,8 @@ public class Entity {
     for(EylloLocation entLoc : locList){
       geoJson.put("type", "Point");
       List<Double> coordinates = new ArrayList();
-      coordinates.add(entLoc.getLatitude());
       coordinates.add(entLoc.getLongitude());
+      coordinates.add(entLoc.getLatitude());
       geoJson.put("coordinates", coordinates);
       geoJson.put("accuracy", entLoc.getAccuracy());
       //jsonMap.put("location", entLoc.getAttribMap());

@@ -3,14 +3,17 @@
  */
 package com.eyllo.paprika.entity.jobs;
 
-import java.util.ArrayList;
 import java.util.List;
-
 //import org.bingmaps.rest.models.Confidence;
 
-import com.eyllo.paprika.entity.Entity;
+import org.apache.avro.generic.GenericArray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.eyllo.paprika.entity.EntityUtils;
 import com.eyllo.paprika.entity.elements.EylloLocation;
+import com.eyllo.paprika.entity.generated.PersistentEntity;
+import com.eyllo.paprika.entity.generated.PersistentPoint;
 import com.eyllo.paprika.geocoder.AbstractGeocoder;
 import com.eyllo.paprika.geocoder.GeocoderFactory;
 import com.eyllo.paprika.html.parser.ParseUtils;
@@ -22,11 +25,16 @@ import com.eyllo.paprika.html.parser.VejaRioParser;
  */
 public class EntityRetriever {
 
-    private List<Entity> entities;
+    ///private List<Entity> entities;
+    private List<PersistentEntity> entities;
     public static String DEFAULT_GEOCODER = "google";
-    private AbstractGeocoder geocoder;
+    private static AbstractGeocoder geocoder;
     private static String DEFAULT_JSON_OUTPUT = "/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/res/vejario/output";
     private static String DEFAULT_JSON_FILE = "/vejaRio.json";
+    /**
+     * Logger to help us write write info/debug/error messages
+     */
+    private static Logger LOGGER = LoggerFactory.getLogger(EntityRetriever.class);
     
     /**
      * @param args
@@ -34,36 +42,80 @@ public class EntityRetriever {
     public static void main(String[] args) {
         // 1. Retrieve entities
         EntityRetriever entRet = new EntityRetriever();
-        entRet.entities = VejaRioParser.getEntities();
+        entRet.entities = new VejaRioParser().getEntities();
         // 2. Store entities
         // 3. Complete entities information
-        entRet.updateGeoInfo();
-        entRet.verifyGeoInfo();
+        entRet.entities = updateGeoInfo(entRet.entities);
+        entRet.entities = verifyGeoInfo(entRet.entities);
         ParseUtils.writeJsonFile(entRet.entities, DEFAULT_JSON_OUTPUT + DEFAULT_JSON_FILE);
     }
 
-    private void verifyGeoInfo(){
+    /**
+     * Gets entities from a specific data source, but also validates them
+     * @param pEntitiesSource
+     * @param pEntities
+     * @return
+     */
+    public static List<PersistentEntity> getGeoValidatedEntities(String pEntitiesSource, List<PersistentEntity> pEntities){
+      /** Getting the entities */
+      pEntities = getEntities(pEntitiesSource);
+      /** Updates entities' geolocation */
+      pEntities = updateGeoInfo(pEntities);
+      /** Verifies entities' geolocation with geocoders available */
+      pEntities = verifyGeoInfo(pEntities);
+      return pEntities;
+    }
+
+    /**
+     * Retrieves an entity set based on the parser used
+     * @param pEntitiesSource
+     * @return
+     */
+    public static List<PersistentEntity> getEntities(String pEntitiesSource){
+      EntityRetriever entRet = new EntityRetriever();
+      if (pEntitiesSource.toLowerCase().equals(VejaRioParser.NAME)){
+        entRet.entities = new VejaRioParser().getEntities();
+      }
+      return entRet.entities;
+    }
+
+    /**
+     * Verifies the geolocalization obtained for each entity
+     * @param pEntities
+     * @return
+     */
+    public static List<PersistentEntity> verifyGeoInfo(List<PersistentEntity> pEntities){
         List<AbstractGeocoder> geocoders = GeocoderFactory.getAllGeocoders();
-        
-        for (Entity ent : this.entities){
-            @SuppressWarnings("unchecked")
-            ArrayList<EylloLocation> locList = (ArrayList<EylloLocation>) ent.getProperties(EntityUtils.LOCATION);
+        for (PersistentEntity ent : pEntities){
+            ///ArrayList<EylloLocation> locList = (ArrayList<EylloLocation>) ent.getProperties(EntityUtils.LOCATION);
+            PersistentPoint entLoc = ent.getPersistentpoint();
             // This will iterate as the number of addresses we have for each entity i.e. 1
-            for(EylloLocation entLoc : locList){
-                if (entLoc.getAddress().equals(""))
+            //for(EylloLocation entLoc : locList){
+                if (entLoc == null || entLoc.getAddress() == null || entLoc.getAddress().equals(""))
                     continue;
                 //if (!entLoc.getAddress().contains("Rua Joana Angélica, 40"))
                 //    continue;
-                double lat_prec = 0, lat_found = entLoc.getLatitude();
-                double lng_prec = 0, lng_found = entLoc.getLongitude();
+                GenericArray<Double> locCoord = entLoc.getCoordinates();
+                double lat_prec = 0, lat_found = 0;// = entLoc.getLatitude();
+                double lng_prec = 0, lng_found = 0;// = entLoc.getLongitude();
+                int iCnt = 0;
+                for (double coord:  locCoord){
+                    if (iCnt == 0) lat_found = coord;
+                    if (iCnt == 1) lng_found = coord;
+                    iCnt ++;
+                }
+                LOGGER.info("Coordinates: " + entLoc.getCoordinates());
                 // This will iterate at most the number of geocoders we have
                 for (AbstractGeocoder geoC : geocoders){
-                    geoC.geoCodeAddress(cleanAddress(entLoc.getAddress()));
+                    geoC.geoCodeAddress(cleanAddress(entLoc.getAddress().toString()));
                     // Verifying latitude value
                     if (Double.isNaN(lat_found)){
-                        lat_found = geoC.getLatitude();
-                        entLoc.setLatitude(geoC.getLatitude());
-                        entLoc.setAccuracyFromGeocoder(geoC.getLocationConfidence());
+                      LOGGER.info("Coordinates eliminados");
+                      entLoc.getCoordinates().clear();
+                      lat_found = geoC.getLatitude();
+                      ///entLoc.setLatitude(geoC.getLatitude());
+                      entLoc.addToCoordinates(lat_found);
+                      entLoc.setAccuracyFromGeocoder(geoC.getLocationConfidence());
                     }
                     else{
                         lat_prec += Math.abs(lat_found) - Math.abs(geoC.getLatitude());
@@ -72,14 +124,16 @@ public class EntityRetriever {
                     // Verifying longitude value
                     if (Double.isNaN(lng_found)){
                         lng_found = geoC.getLongitude();
-                        entLoc.setLongitude(geoC.getLongitude());
+                        ///entLoc.setLongitude(geoC.getLongitude());
+                        entLoc.addToCoordinates(lng_found);
                         entLoc.setAccuracyFromGeocoder(geoC.getLocationConfidence());
                     }
                     else{
                         lng_prec += Math.abs(lng_found) - Math.abs(geoC.getLongitude());
                         lng_found = geoC.getLongitude();
                     }
-                }
+                }//END-FOR GEOCODERS
+                LOGGER.info("Coordinates Actualizadas: " + entLoc.getCoordinates());
                 double finalLatPrec = Math.abs(lat_prec);
                 double finalLngPrec = Math.abs(lng_prec);
                 // if any of them are still 0, that means that we didn't have any to compare with
@@ -93,44 +147,55 @@ public class EntityRetriever {
                     if (finalLatPrec < EylloLocation.LOC_PREC_THRESHOLD_HIGH
                             || finalLngPrec < EylloLocation.LOC_PREC_THRESHOLD_HIGH)
                         entLoc.setAccuracy(EylloLocation.GEOCODER_VERIF_ACC_HIGH);
-                }
-            }
-        }
+                }//END-IF FINAL
+            //}//END-FOR LOCATIONS
+        }//END-FOR ENTITIES
+        return pEntities;
     }
 
     /**
      * Updates geoInformation about entity's location
      */
-    private void updateGeoInfo(){
+    public static List<PersistentEntity> updateGeoInfo(List<PersistentEntity> pEntities){
         // 1. Read entities which its geo information is not complete
         // 2. Complete its geo Information
-        this.geocoder = GeocoderFactory.getGeocoder("google");
-        for (Entity ent : this.entities){
-            //if (ent.getLocations().size() > 0)
-              //  if (ent.getLocations().get(0).getAddress().contains("Rua Joana Angélica, 40"))
-                    this.setGeoLocations(ent, this.geocoder);
-            //break;
+        geocoder = GeocoderFactory.getGeocoder("google");
+        for (PersistentEntity ent : pEntities){
+          //if (ent.getLocations().size() > 0)
+          //  if (ent.getLocations().get(0).getAddress().contains("Rua Joana Angélica, 40"))
+          ent = setGeoLocations(ent, geocoder);
+          //break;
         }
+        return pEntities;
     }
 
     /**
      * Gets specific geographic locations for an entity's address
      */
-    @SuppressWarnings("unchecked")
-    private void setGeoLocations(Entity pEntity, AbstractGeocoder pGeoCoder){
-      ArrayList<EylloLocation> locList = (ArrayList<EylloLocation>) pEntity.getProperties(EntityUtils.LOCATION);
-      for(EylloLocation entLoc : locList){
-        
-        pGeoCoder.geoCodeAddress(cleanAddress(entLoc.getAddress()));
-        entLoc.setLatitude(pGeoCoder.getLatitude());
-        //entLoc.setLatitude(1);
-        entLoc.setLongitude(pGeoCoder.getLongitude());
-        //entLoc.setLongitude(1);
+    public static PersistentEntity setGeoLocations(PersistentEntity pEntity, AbstractGeocoder pGeoCoder){
+      ///ArrayList<EylloLocation> locList = (ArrayList<EylloLocation>) pEntity.getProperties(EntityUtils.LOCATION);
+      PersistentPoint entLoc = pEntity.getPersistentpoint();
+      if (entLoc != null && entLoc.getAddress() != null){
+        pGeoCoder.geoCodeAddress(cleanAddress(entLoc.getAddress().toString()));
+        entLoc.getCoordinates().clear();
+        ///entLoc.setLatitude(pGeoCoder.getLatitude());
+        entLoc.getCoordinates().add(pGeoCoder.getLatitude());
+        //entLoc.setLongitude(pGeoCoder.getLongitude());
+        entLoc.getCoordinates().add(pGeoCoder.getLongitude());
         entLoc.setAccuracyFromGeocoder(pGeoCoder.getLocationConfidence());
       }
+      else
+        LOGGER.debug(pEntity.getName().toString() + "Entity did not have an address.");
+      
+      return pEntity;
     }
-    
-    private String cleanAddress(String pAddress){
+
+    /**
+     * Cleans an address within a string
+     * @param pAddress
+     * @return
+     */
+    private static String cleanAddress(String pAddress){
         StringBuilder cleanAdd = new StringBuilder();
         if (pAddress.toLowerCase().contains("loja") || pAddress.toLowerCase().contains("lja")){
             String parts [] = pAddress.split("-");

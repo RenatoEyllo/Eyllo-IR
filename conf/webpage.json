@@ -1,0 +1,67 @@
+{
+  "type": "record",
+  "name": "WebPage",
+  "namespace": "org.apache.gora.examples.generated",
+  "fields" : [
+    {"name": "url", "type": "string"},
+    {"name": "content", "type": "bytes"},
+    {"name": "parsedContent", "type": {"type":"array", "items": "string"}},
+    {"name": "outlinks", "type": {"type":"map", "values":"string"}},
+    {"name": "metadata", "type": {
+      "name": "Metadata",
+      "type": "record",
+      "namespace": "org.apache.gora.examples.generated",
+      "fields": [
+        {"name": "version", "type": "int"},
+        {"name": "data", "type": {"type": "map", "values": "string"}}
+      ]
+    }}
+  ]
+}
+
+
+{
+  "type": "record",
+  "name": "PersistentEntity",
+  "namespace": "com.eyllo.paprika.entity.generated",
+  "fields" : [
+    {"name": "description", "type": "string"},
+    {"name": "assets", "type": "string"},
+    {"name": "comment", "type": "string"},
+    {"name": "depiction", "type": "string"},
+    {"name": "extraInfo", "type": "string"},
+    {"name": "foundation", "type": "string"},
+    {"name": "foundationPlace", "type": "string"},
+    {"name": "foundingYear", "type": "string"},
+    {"name": "hasPhotoCollection", "type": "boolean"},
+    {"name": "industry", "type": "string"},
+    {"name": "label", "type": "string"},
+    {"name": "homepage", "type": "string"},
+    {"name": "name", "type": "string"},
+    {"name": "scenarioId", "type": {"type":"array", "items": "string"}},
+    {"name": "services", "type": {"type":"array", "items":"string"}},
+    {"name": "locations", "type": {"type":"array", "items":{
+      "name": "PersistentPoint",
+      "type": "record",
+      "namespace": "com.eyllo.paprika.entity.generated",
+      "fields": [
+        {"name": "accuracy", "type": "double"},
+        {"name": "address", "type": "string"},
+        {"name": "coordinates", "type": {"type": "array", "items": "double"}}
+      ]
+    }}},
+    {"name": "logo", "type": "bytes"},
+    {"name": "netIncome", "type": "double"},
+    {"name": "numberOfEmployees", "type": "double"},
+    {"name": "telephones", "type": {"type":"array", "items": "string"}},
+    {"name": "products", "type": {"type":"array", "items": "string"}},
+    {"name": "revenue", "type": "double"},
+    {"name": "sameAs", "type": {"type":"array", "items": "string"}},
+    {"name": "schedule", "type": "string"},
+    {"name": "subject", "type": "string"},
+    {"name": "thumbnail", "type": "string"},
+    {"name": "type", "type": "string"},
+    {"name": "wikiPageExternalLink", "type": "string"},
+    {"name": "wikiPageUsesTemplate", "type": "string"}
+  ]
+}

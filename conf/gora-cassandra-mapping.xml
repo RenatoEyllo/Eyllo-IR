@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+
+<gora-orm>
+
+  <keyspace name="EylloEntities" host="localhost" cluster="Test Cluster">
+    <family name="entities" />
+    <family name="entities_location" type="super" />
+  </keyspace>
+  
+  <keyspace name="WebPageEntity" host="localhost" cluster="Gora Cassandra Test Cluster">
+    <family name="basic"/>
+    <family name="complementary" type="super"/>
+  </keyspace>
+  
+  <class name="com.eyllo.paprika.entity.generated.PersistentEntity" keyClass="java.lang.String" keyspace="WebPageEntity">
+    <field name="homepage" family="basic" qualifier="homepage"/>
+    <field name="name" family="basic" qualifier="name"/>
+    <field name="description" family="basic" qualifier="description"/>
+    <field name="assets" family="basic" qualifier="assets"/>
+    <field name="comment" family="basic" qualifier="comment"/>
+    <field name="depiction" family="basic" qualifier="depiction"/>
+    <field name="extraInfo" family="basic" qualifier="extraInfo"/>
+    <field name="foundation" family="basic" qualifier="foundation"/>
+    <field name="foundationPlace" family="basic" qualifier="foundationPlace"/>
+    <field name="foundingYear" family="basic" qualifier="foundingYear"/>
+    <field name="hasPhotoCollection" family="basic" qualifier="hasPhotoCollection"/>
+    <field name="industry" family="basic" qualifier="industry"/>
+    <field name="label" family="basic" qualifier="label"/>
+    <field name="logo" family="basic" qualifier="logo"/>
+    <field name="netIncome" family="basic" qualifier="netIncome"/>
+    <field name="numberOfEmployees" family="basic" qualifier="numberOfEmployees"/>
+    <field name="revenue" family="basic" qualifier="revenue"/>
+    <field name="schedule" family="basic" qualifier="schedule"/>
+    <field name="subject" family="basic" qualifier="subject"/>
+    <field name="thumbnail" family="basic" qualifier="thumbnail"/>
+    <field name="type" family="basic" qualifier="type"/>
+    <field name="wikiPageExternalLink" family="basic" qualifier="wikiPageExternalLink"/>
+    <field name="wikiPageUsesTemplate" family="basic" qualifier="wikiPageUsesTemplate"/>
+    <field name="scenarioId" family="complementary" qualifier="scenarioId"/>
+    <field name="services" family="complementary" qualifier="services"/>
+    <field name="persistentpoint" family="complementary" qualifier="persistentpoint"/>
+    <field name="sameAs" family="complementary" qualifier="sameAs"/>
+    <field name="telephones" family="complementary" qualifier="telephones"/>
+    <field name="products" family="complementary" qualifier="products"/>
+  </class>
+</gora-orm>

@@ -3,26 +3,22 @@
  */
 package com.eyllo.paprika.html.parser;
 
-//import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
-import org.jsoup.Jsoup;
+import org.apache.avro.util.Utf8;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eyllo.paprika.entity.Entity;
-import com.eyllo.paprika.entity.EntityUtils;
 import com.eyllo.paprika.entity.elements.EylloLink;
-import com.eyllo.paprika.entity.elements.EylloLocation;
+import com.eyllo.paprika.entity.generated.PersistentEntity;
+import com.eyllo.paprika.entity.generated.PersistentPoint;
 
 /**
  * Extracts entity information from a VejaRio magazine - http://vejario.abril.com.br/
@@ -30,20 +26,23 @@ import com.eyllo.paprika.entity.elements.EylloLocation;
  */
 public class VejaRioParser {
 
-  private List<Entity> entities;
-
   /**
-   * Default encoding for reading portuguese pages
+   * List of PersistentEntities that will be fetched
    */
-  //private static String DEFAULT_ENCODING = "UTF-8";//"ISO-8859-1"
-  
-  public static String INFO_SEP = " - ";
+  private List<PersistentEntity> pEntities;
+
   private static String DEFAULT_VJR_URL = "http://vejario.abril.com.br/";
   private static String DEFAULT_VJR_SEARCH_URL = "http://vejario.abril.com.br/listagem-do-guia.php?guia_id=1&guia_bairros=Ipanema&guia_especialidades=&guia_nome=";
   // http://vejario.abril.com.br/listagem-do-guia.php?guia_id=1&guia_bairros=Ipanema&guia_especialidades=&guia_nome=
   // http://vejasp.abril.com.br/estabelecimento/busca?per_page=1000&page=40&q=&fq=Restaurantes&bairro=&nome=&preco_maximo=&_=
-  private static String DEFAULT_VJR_DOC = "/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/res/vejario/VejaRioIpanema.html";
+  //private static String DEFAULT_VJR_DOC = "/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/res/vejario/VejaRioIpanema.html";
   private static Integer DEFAULT_SCENARIOID = 6;
+  private static String DEFAULT_CITY = "Rio de Janeiro-RJ";
+
+  /**
+   * VejaRio parser's name
+   */
+  public static String NAME = "vejario";
 
   /**
    * Logger to help us write write info/debug/error messages
@@ -54,7 +53,7 @@ public class VejaRioParser {
    * Default constructor
    */
   public VejaRioParser(){
-    this.entities = new ArrayList<Entity>();
+    this.pEntities = new ArrayList<PersistentEntity>();
   }
   
   /**
@@ -62,8 +61,9 @@ public class VejaRioParser {
    */
   public static void main(String[] args) {
     VejaRioParser vjrParser = new VejaRioParser();
+    ParseUtils.printPersistentEntities(vjrParser.pEntities);
     vjrParser.parseSearchResults(DEFAULT_VJR_SEARCH_URL);
-    vjrParser.completeEntityInfo();
+    //vjrParser.completeEntityInfo();
     //ParseUtils.writeJsonFile(vjrParser.entities, DEFAULT_JSON_OUTPUT + DEFAULT_JSON_FILE);
     //ParseUtils.generateSeedFile("");
     //ParseUtils.persistEntities(this.entities);
@@ -73,19 +73,19 @@ public class VejaRioParser {
    * Gets entities from an specific URL
    * @return
    */
-  public static List<Entity> getEntities(){
-      VejaRioParser vjrParser = new VejaRioParser();
-      vjrParser.parseSearchResults(DEFAULT_VJR_SEARCH_URL);
-      vjrParser.completeEntityInfo();
-      return vjrParser.entities;
+  public List<PersistentEntity> getEntities(){
+      //VejaRioParser vjrParser = new VejaRioParser();
+     this.parseSearchResults(DEFAULT_VJR_SEARCH_URL);
+     this.completeEntityInfo();
+     return this.pEntities;
   }
   
   /**
    * Parses individual sites to obtain extra information
    */
   public void completeEntityInfo(){
-      if (this.entities != null & this.entities.size() >0)
-        for (Entity ent : this.entities){
+      if (this.pEntities != null & this.pEntities.size() >0)
+        for (PersistentEntity ent : this.pEntities){
           this.parseIndividualEnt(ent);
         }
       else
@@ -96,62 +96,53 @@ public class VejaRioParser {
    * Parsing individual sameAs links from individual entities.
    * @param pEntity
    */
-  @SuppressWarnings("unchecked")
-  public void parseIndividualEnt(Entity pEntity){
+  public void parseIndividualEnt(PersistentEntity pEntity){
     Document doc = null;
-    List<EylloLink> links = (List<EylloLink>)pEntity.getProperties(EntityUtils.SAME_AS);
-
-    for (EylloLink link : links){
-      // Reading individual URLs
-      URI uri = null;
-      try {
-        URL url = new URL(link.getLinkHref());
-        String nullFragment = null;
-        uri = new URI(url.getProtocol(), url.getHost(), url.getPath(), url.getQuery(), nullFragment);
-      } catch (URISyntaxException e) {
-        LOGGER.error("Error while trying to read the following URL: " + link.getLinkHref());
-        e.printStackTrace();
-      } catch (MalformedURLException e) {
-        LOGGER.error("Error while trying to read the following URL: " + link.getLinkHref());
-        e.printStackTrace();
-      }
-      doc = ParseUtils.connectGetUrl(uri.toASCIIString());
-
-      // Parsing individual sites
-      if (doc != null){
-        try{
-          Element guiaText = doc.select("div.text.guia").first();
-          pEntity.setProperties(EntityUtils.SUBJECT, doc.select("h1").first().ownText());
-
-          // Getting the information within the entity's site
-          Elements infoBlocks = guiaText.children();
-          for ( int iCnt = 0; iCnt < infoBlocks.size(); iCnt ++){
-            Element infoBlock = infoBlocks.get(iCnt);
-            switch(iCnt){
-              case 0:
-                EylloLink homePage = ParseUtils.detectUrl(infoBlock.select("p[id=g_site]").select("a").first());
-                if (homePage != null)
-                  pEntity.setProperties(EntityUtils.HOME_PAGE, homePage.getLinkHref());
-                break;
-              case 1:
-                pEntity.setProperties(EntityUtils.ABSTRACT, infoBlock.select("p").first().ownText());
-                break;
-              case 2:
-                extractExtraInfo(infoBlock.select("p"), pEntity);
-                break;
-              default:
-                LOGGER.info("New element detected inside " + uri.toASCIIString());
-                LOGGER.info(infoBlock.toString());
-            }// END-OUTER-SWITCH
-          }// END-FOR
-        }catch (NullPointerException e){
-          //System.out.println(doc.toString());
-          System.out.println(uri.toASCIIString());
-          e.printStackTrace();
-        }
+    ///List<EylloLink> links = (List<EylloLink>)pEntity.getProperties(EntityUtils.SAME_AS);
+    //Map<Utf8,Utf8> sameAsLinks = pEntity.getSameAs();
+    Iterator<Entry<Utf8, Utf8>> it = pEntity.getSameAs().entrySet().iterator();
+    while (it.hasNext()) {
+        Map.Entry<Utf8, Utf8> pairs = (Map.Entry<Utf8, Utf8>)it.next();
         
-      }// END-IF
-    }
+        // Reading individual URLs
+        doc = ParseUtils.connectGetUrl(ParseUtils.getUri(pairs.getValue().toString()).toASCIIString());
+
+        // Parsing individual sites
+        if (doc != null){
+          try{
+            Element guiaText = doc.select("div.text.guia").first();
+          ///pEntity.setProperties(EntityUtils.SUBJECT, doc.select("h1").first().ownText());
+            pEntity.setSubject(new Utf8(doc.select("h1").first().ownText()));
+
+            // Getting the information within the entity's site
+            Elements infoBlocks = guiaText.children();
+            for ( int iCnt = 0; iCnt < infoBlocks.size(); iCnt ++){
+              Element infoBlock = infoBlocks.get(iCnt);
+              switch(iCnt){
+                case 0:
+                  EylloLink homePage = ParseUtils.detectUrl(infoBlock.select("p[id=g_site]").select("a").first());
+                  if (homePage != null)
+                    pEntity.setHomepage(new Utf8(homePage.getLinkHref()));
+                    ///pEntity.setProperties(EntityUtils.HOME_PAGE, homePage.getLinkHref());
+                  break;
+                case 1:
+                    pEntity.setDescription(new Utf8(infoBlock.select("p").first().ownText()));
+                  ///pEntity.setProperties(EntityUtils.DESCRIPTION, infoBlock.select("p").first().ownText());
+                  break;
+                case 2:
+                  extractExtraInfo(infoBlock.select("p"), pEntity);
+                  break;
+                default:
+                  LOGGER.info("New element detected inside " + pairs.getValue().toString());
+                  LOGGER.info(infoBlock.toString());
+              }// END-OUTER-SWITCH
+            }// END-FOR
+          }catch (NullPointerException e){
+            LOGGER.error("Error while parsing URL: " + pairs.getValue().toString());
+            e.printStackTrace();
+          }
+        }// END-IF
+    }// END-WHILE
   }
 
   /**
@@ -159,39 +150,55 @@ public class VejaRioParser {
    * @param extraInfos
    * @param pEntity
    */
-  public void extractExtraInfo(Elements extraInfos, Entity pEntity){
-    LOGGER.info("Extracting extra information about entities" + pEntity.getProperties(EntityUtils.NAME));
-    EylloLocation entLoc = new EylloLocation();
+  public void extractExtraInfo(Elements extraInfos, PersistentEntity pEntity){
+    LOGGER.info("Extracting extra information about entities " + pEntity.getName().toString());
+    ///EylloLocation entLoc = new EylloLocation();
+    PersistentPoint entLoc = new PersistentPoint();
     for (int iCntInf = 0; iCntInf < extraInfos.size(); iCntInf++){
           if (extraInfos.get(iCntInf).text().toLowerCase().contains("endereo")){
-            entLoc.setAddress(extraInfos.get(iCntInf).ownText());
-            pEntity.addLocations(entLoc);
+            ///entLoc.setAddress(extraInfos.get(iCntInf).ownText());
+            entLoc.setAddress(new Utf8(extraInfos.get(iCntInf).ownText()));
+            ///pEntity.addLocations(entLoc);
+            pEntity.setPersistentpoint(entLoc);
           }
-          else if (extraInfos.get(iCntInf).text().toLowerCase().contains("bairro"))
-            entLoc.setAddress(entLoc.getAddress() + VejaRioParser.INFO_SEP + extraInfos.get(iCntInf).ownText());
+          else if (extraInfos.get(iCntInf).text().toLowerCase().contains("bairro")){
+            // adding address
+            ///entLoc.setAddress(entLoc.getAddress() + VejaRioParser.INFO_SEP + extraInfos.get(iCntInf).ownText());
+              entLoc.setAddress(new Utf8(entLoc.getAddress().toString() + ParseUtils.INFO_SEP + extraInfos.get(iCntInf).ownText()));
+            // adding city
+            ///entLoc.setAddress(entLoc.getAddress() + VejaRioParser.INFO_SEP + VejaRioParser.DEFAULT_CITY);
+              entLoc.setAddress(new Utf8(entLoc.getAddress().toString() + ParseUtils.INFO_SEP + VejaRioParser.DEFAULT_CITY));
+          }
           else if (extraInfos.get(iCntInf).text().toLowerCase().contains("cep")){
             //System.out.println("CEP");
-            entLoc.setAddress(entLoc.getAddress() + VejaRioParser.INFO_SEP + extraInfos.get(iCntInf).text());
+            ///entLoc.setAddress(entLoc.getAddress() + VejaRioParser.INFO_SEP + extraInfos.get(iCntInf).text());
+              entLoc.setAddress(new Utf8(entLoc.getAddress().toString() + ParseUtils.INFO_SEP + extraInfos.get(iCntInf).text()));
           }
           else if (extraInfos.get(iCntInf).text().toLowerCase().contains("telefone"))
-            pEntity.setProperties(EntityUtils.PHONES, extraInfos.get(iCntInf).ownText());
+            ///pEntity.setProperties(EntityUtils.PHONES, extraInfos.get(iCntInf).ownText());
+              pEntity.addToTelephones(new Utf8(extraInfos.get(iCntInf).ownText()));
           else if (extraInfos.get(iCntInf).text().toLowerCase().contains("hor‡rio"))
-            pEntity.setProperties(EntityUtils.SCHEDULE, extraInfos.get(iCntInf).ownText());
+            ///pEntity.setProperties(EntityUtils.SCHEDULE, extraInfos.get(iCntInf).ownText());
+              pEntity.setSchedule(new Utf8(extraInfos.get(iCntInf).ownText()));
           else if (extraInfos.get(iCntInf).text().toLowerCase().contains("servios")){
-            StringBuilder services = new StringBuilder();
+            ///StringBuilder services = new StringBuilder();
             for (Element el : extraInfos.get(iCntInf).children().select("a"))
-              services.append(el.text()).append(VejaRioParser.INFO_SEP);
-            pEntity.setProperties(EntityUtils.SERVICES, services.toString());
+                pEntity.addToServices(new Utf8(el.text()));
+              ///services.append(el.text()).append(VejaRioParser.INFO_SEP);
+            ///pEntity.setProperties(EntityUtils.SERVICES, services.toString());
           }
           else if (extraInfos.get(iCntInf).text().toLowerCase().contains("cart›es de crŽdito")){
             StringBuilder creditCardInfo = new StringBuilder();
             creditCardInfo.append(extraInfos.get(iCntInf).text());
             for (Element el : extraInfos.get(iCntInf).children().select("img"))
-              creditCardInfo.append(el.attr("title")).append(VejaRioParser.INFO_SEP);
-            pEntity.setProperties(EntityUtils.EXTRA_INFO, creditCardInfo.toString());
+                pEntity.addToExtraInfo(new Utf8(el.attr("title")));
+              ///creditCardInfo.append(el.attr("title")).append(VejaRioParser.INFO_SEP);
+            ///pEntity.setProperties(EntityUtils.EXTRA_INFO, creditCardInfo.toString());
+            
           }
           else 
-            pEntity.setProperties(EntityUtils.EXTRA_INFO, extraInfos.get(iCntInf).text());
+            ///pEntity.setProperties(EntityUtils.EXTRA_INFO, extraInfos.get(iCntInf).text());
+              pEntity.addToExtraInfo(new Utf8(extraInfos.get(iCntInf).text()));
     }// END-FOR
     LOGGER.info("Finished extracting extra information about entities");
   }
@@ -202,42 +209,35 @@ public class VejaRioParser {
    */
   public void parseSearchResults(String pUrl){
     LOGGER.info("Starting to parse data from " + pUrl);
-    Document doc = null;
-    //File input;
-
-    try {
-      //input = new File(DEFAULT_VJR_DOC);
-      doc = Jsoup.parse(new URL(pUrl), 30000); //doc = Jsoup.connect(DEFAULT_TL_URL.format(URLEncoder.encode(DEFAULT_TL_URL, "UTF-8"))).get();
-      //doc = Jsoup.parse(input, DEFAULT_ENCODING, pUrl);
-    } catch (MalformedURLException e) {
-      LOGGER.error("Error while trying to parse document " + DEFAULT_VJR_DOC);
-      e.printStackTrace();
-    } catch (IOException e) {
-      LOGGER.error("Error while trying to parse document " + DEFAULT_VJR_DOC);
-      e.printStackTrace();
-    }
+    Document doc = ParseUtils.connectGetUrl(pUrl);
 
     Element div = doc.select("div[id=bsc_resultado]").first();
     Elements resBlocks = div.children();
-    //int xxyy = 0;
+    int xxyy = 0;
     for (Element resBlock : resBlocks){
-      Entity tmpEntity = new Entity();
+      //Entity tmpEntity = new Entity();
+      PersistentEntity tmpPerEntity = new PersistentEntity();
       // setting default scenarioID for VejaRio magazine
-      tmpEntity.setProperties(EntityUtils.SCENARIO_ID, DEFAULT_SCENARIOID);
+      tmpPerEntity.addToScenarioId(DEFAULT_SCENARIOID);
+    ///tmpEntity.setProperties(EntityUtils.SCENARIO_ID, DEFAULT_SCENARIOID);
       // getting classification
-      tmpEntity.setProperties(EntityUtils.SUBJECT, resBlock.select("h3").text());
+      tmpPerEntity.setSubject(new Utf8(resBlock.select("h3").text()));
+    ///tmpEntity.setProperties(EntityUtils.SUBJECT, resBlock.select("h3").text());
       // getting name and sameAs link
+      
       EylloLink sasLink = ParseUtils.detectUrl(resBlock.select("h2").first().children().first());
       if (sasLink != null){
-        tmpEntity.setProperties(EntityUtils.NAME, sasLink.getLinkText());
-        sasLink.setLinkHref(VejaRioParser.DEFAULT_VJR_URL + sasLink.getLinkHref());
-        tmpEntity.addLink(sasLink);
+        ///tmpEntity.setProperties(EntityUtils.NAME, sasLink.getLinkText());
+        tmpPerEntity.setName(new Utf8(sasLink.getLinkText()));
+        ///sasLink.setLinkHref(VejaRioParser.DEFAULT_VJR_URL + sasLink.getLinkHref());
+        ///tmpEntity.addLink(sasLink);
+        tmpPerEntity.putToSameAs(new Utf8(sasLink.getLinkText()), new Utf8(VejaRioParser.DEFAULT_VJR_URL + sasLink.getLinkHref()));
       }
-      this.entities.add(tmpEntity);
-      
-      //if (++xxyy == 10)
-      //  break;
-    }
+    ///this.entities.add(tmpEntity);
+      this.pEntities.add(tmpPerEntity);
+      if (++xxyy == 100)
+        break;
+    }/**/
 
     LOGGER.info("Finished collecting initial entities.");
     //ParseUtils.printEntities(this.entities);

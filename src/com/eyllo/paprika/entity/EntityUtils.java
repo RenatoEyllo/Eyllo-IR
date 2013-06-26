@@ -14,7 +14,7 @@ public class EntityUtils {
   /**
    * Entity's properties
    */
-  public static String ABSTRACT = "abstract";
+  public static String DESCRIPTION = "description";
   public static String ASSETS = "assets";
   public static String COMMENT = "comment";
   public static String DEPICTION = "depiction";
@@ -51,7 +51,7 @@ public class EntityUtils {
    */
   public static Map<String, Object> initializeProperties(){
     Map<String, Object> properties = new HashMap<String, Object>();
-    properties.put(ABSTRACT, null);
+    properties.put(DESCRIPTION, null);
     properties.put(ASSETS, null);
     properties.put(COMMENT, null);
     properties.put(DEPICTION, null);
