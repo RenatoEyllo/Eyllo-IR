@@ -17,8 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.eyllo.paprika.entity.elements.EylloLink;
-import com.eyllo.paprika.entity.generated.PersistentEntity;
-import com.eyllo.paprika.entity.generated.PersistentPoint;
+import com.eyllo.paprika.entity.elements.PersistentEntity;
+import com.eyllo.paprika.entity.elements.PersistentPoint;
 
 /**
  * Extracts entity information from a VejaRio magazine - http://vejario.abril.com.br/
@@ -63,6 +63,7 @@ public class VejaRioParser {
     VejaRioParser vjrParser = new VejaRioParser();
     ParseUtils.printPersistentEntities(vjrParser.pEntities);
     vjrParser.parseSearchResults(DEFAULT_VJR_SEARCH_URL);
+    ParseUtils.printPersistentEntities(vjrParser.pEntities);
     //vjrParser.completeEntityInfo();
     //ParseUtils.writeJsonFile(vjrParser.entities, DEFAULT_JSON_OUTPUT + DEFAULT_JSON_FILE);
     //ParseUtils.generateSeedFile("");
@@ -155,7 +156,7 @@ public class VejaRioParser {
     ///EylloLocation entLoc = new EylloLocation();
     PersistentPoint entLoc = new PersistentPoint();
     for (int iCntInf = 0; iCntInf < extraInfos.size(); iCntInf++){
-          if (extraInfos.get(iCntInf).text().toLowerCase().contains("endereo")){
+          if (extraInfos.get(iCntInf).text().toLowerCase().contains("endereÃ§o")){
             ///entLoc.setAddress(extraInfos.get(iCntInf).ownText());
             entLoc.setAddress(new Utf8(extraInfos.get(iCntInf).ownText()));
             ///pEntity.addLocations(entLoc);
@@ -164,30 +165,30 @@ public class VejaRioParser {
           else if (extraInfos.get(iCntInf).text().toLowerCase().contains("bairro")){
             // adding address
             ///entLoc.setAddress(entLoc.getAddress() + VejaRioParser.INFO_SEP + extraInfos.get(iCntInf).ownText());
-              entLoc.setAddress(new Utf8(entLoc.getAddress().toString() + ParseUtils.INFO_SEP + extraInfos.get(iCntInf).ownText()));
+              entLoc.setAddress(new Utf8(entLoc.getAddress().toString() + ConstantsParser.INFO_SEP + extraInfos.get(iCntInf).ownText()));
             // adding city
             ///entLoc.setAddress(entLoc.getAddress() + VejaRioParser.INFO_SEP + VejaRioParser.DEFAULT_CITY);
-              entLoc.setAddress(new Utf8(entLoc.getAddress().toString() + ParseUtils.INFO_SEP + VejaRioParser.DEFAULT_CITY));
+              entLoc.setAddress(new Utf8(entLoc.getAddress().toString() + ConstantsParser.INFO_SEP + VejaRioParser.DEFAULT_CITY));
           }
           else if (extraInfos.get(iCntInf).text().toLowerCase().contains("cep")){
             //System.out.println("CEP");
             ///entLoc.setAddress(entLoc.getAddress() + VejaRioParser.INFO_SEP + extraInfos.get(iCntInf).text());
-              entLoc.setAddress(new Utf8(entLoc.getAddress().toString() + ParseUtils.INFO_SEP + extraInfos.get(iCntInf).text()));
+              entLoc.setAddress(new Utf8(entLoc.getAddress().toString() + ConstantsParser.INFO_SEP + extraInfos.get(iCntInf).text()));
           }
           else if (extraInfos.get(iCntInf).text().toLowerCase().contains("telefone"))
             ///pEntity.setProperties(EntityUtils.PHONES, extraInfos.get(iCntInf).ownText());
               pEntity.addToTelephones(new Utf8(extraInfos.get(iCntInf).ownText()));
-          else if (extraInfos.get(iCntInf).text().toLowerCase().contains("hor‡rio"))
+          else if (extraInfos.get(iCntInf).text().toLowerCase().contains("horÃ¡rio"))
             ///pEntity.setProperties(EntityUtils.SCHEDULE, extraInfos.get(iCntInf).ownText());
               pEntity.setSchedule(new Utf8(extraInfos.get(iCntInf).ownText()));
-          else if (extraInfos.get(iCntInf).text().toLowerCase().contains("servios")){
+          else if (extraInfos.get(iCntInf).text().toLowerCase().contains("serviÃ§os")){
             ///StringBuilder services = new StringBuilder();
             for (Element el : extraInfos.get(iCntInf).children().select("a"))
                 pEntity.addToServices(new Utf8(el.text()));
               ///services.append(el.text()).append(VejaRioParser.INFO_SEP);
             ///pEntity.setProperties(EntityUtils.SERVICES, services.toString());
           }
-          else if (extraInfos.get(iCntInf).text().toLowerCase().contains("cart›es de crŽdito")){
+          else if (extraInfos.get(iCntInf).text().toLowerCase().contains("cartÃµes de crÃ©dito")){
             StringBuilder creditCardInfo = new StringBuilder();
             creditCardInfo.append(extraInfos.get(iCntInf).text());
             for (Element el : extraInfos.get(iCntInf).children().select("img"))

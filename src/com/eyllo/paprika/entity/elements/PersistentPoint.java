@@ -16,7 +16,7 @@
  *limitations under the License.
  */
 
-package com.eyllo.paprika.entity.generated;
+package com.eyllo.paprika.entity.elements;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -40,8 +40,6 @@ import org.apache.gora.persistency.impl.StateManagerImpl;
 import org.apache.gora.persistency.StatefulHashMap;
 import org.apache.gora.persistency.ListGenericArray;
 import org.bingmaps.rest.models.Confidence;
-
-import com.eyllo.paprika.entity.elements.EylloLocation;
 
 @SuppressWarnings("all")
 public class PersistentPoint extends PersistentBase {

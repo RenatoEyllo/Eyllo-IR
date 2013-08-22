@@ -12,12 +12,16 @@ import org.slf4j.LoggerFactory;
 
 import com.eyllo.paprika.entity.EntityUtils;
 import com.eyllo.paprika.entity.elements.EylloLocation;
-import com.eyllo.paprika.entity.generated.PersistentEntity;
-import com.eyllo.paprika.entity.generated.PersistentPoint;
+import com.eyllo.paprika.entity.elements.PersistentEntity;
+import com.eyllo.paprika.entity.elements.PersistentPoint;
 import com.eyllo.paprika.geocoder.AbstractGeocoder;
 import com.eyllo.paprika.geocoder.GeocoderFactory;
+import com.eyllo.paprika.html.parser.ApontadorParser;
+import com.eyllo.paprika.html.parser.PaginasAmarillasParser;
 import com.eyllo.paprika.html.parser.ParseUtils;
+import com.eyllo.paprika.html.parser.RioGuiaParser;
 import com.eyllo.paprika.html.parser.VejaRioParser;
+import com.eyllo.paprika.html.parser.VejaSaoPauloParser;
 
 /**
  * @author renatomarroquin
@@ -29,8 +33,7 @@ public class EntityRetriever {
     private List<PersistentEntity> entities;
     public static String DEFAULT_GEOCODER = "google";
     private static AbstractGeocoder geocoder;
-    private static String DEFAULT_JSON_OUTPUT = "/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/res/vejario/output";
-    private static String DEFAULT_JSON_FILE = "/vejaRio.json";
+    private static String DEFAULT_JSON_OUTPUT = "/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/res/";
     /**
      * Logger to help us write write info/debug/error messages
      */
@@ -42,12 +45,14 @@ public class EntityRetriever {
     public static void main(String[] args) {
         // 1. Retrieve entities
         EntityRetriever entRet = new EntityRetriever();
-        entRet.entities = new VejaRioParser().getEntities();
+        entRet.entities = new ApontadorParser("hotels", 50, 20).getEntities();
         // 2. Store entities
         // 3. Complete entities information
-        entRet.entities = updateGeoInfo(entRet.entities);
-        entRet.entities = verifyGeoInfo(entRet.entities);
-        ParseUtils.writeJsonFile(entRet.entities, DEFAULT_JSON_OUTPUT + DEFAULT_JSON_FILE);
+        //entRet.entities = updateGeoInfo(entRet.entities);
+        //entRet.entities = verifyGeoInfo(entRet.entities);
+        //TODO update specific parsers to return their own file name
+        ParseUtils.writeJsonFile(entRet.entities,
+            DEFAULT_JSON_OUTPUT + ApontadorParser.getOutputFileName());
     }
 
     /**
@@ -73,8 +78,20 @@ public class EntityRetriever {
      */
     public static List<PersistentEntity> getEntities(String pEntitiesSource){
       EntityRetriever entRet = new EntityRetriever();
-      if (pEntitiesSource.toLowerCase().equals(VejaRioParser.NAME)){
+      if (pEntitiesSource.equals(VejaRioParser.NAME)){
         entRet.entities = new VejaRioParser().getEntities();
+      }
+      if (pEntitiesSource.equals(PaginasAmarillasParser.NAME)){
+        entRet.entities = new PaginasAmarillasParser().getEntities();
+      }
+      if (pEntitiesSource.equals(RioGuiaParser.NAME)){
+        entRet.entities = new RioGuiaParser().getEntities();
+      }
+      if (pEntitiesSource.equals(VejaSaoPauloParser.NAME)){
+        entRet.entities = new VejaSaoPauloParser().getEntities();
+      }
+      if (pEntitiesSource.equals(ApontadorParser.NAME)){
+        entRet.entities = new ApontadorParser().getEntities();
       }
       return entRet.entities;
     }
@@ -93,7 +110,7 @@ public class EntityRetriever {
             //for(EylloLocation entLoc : locList){
                 if (entLoc == null || entLoc.getAddress() == null || entLoc.getAddress().equals(""))
                     continue;
-                //if (!entLoc.getAddress().contains("Rua Joana AngŽlica, 40"))
+                //if (!entLoc.getAddress().contains("Rua Joana Angï¿½lica, 40"))
                 //    continue;
                 GenericArray<Double> locCoord = entLoc.getCoordinates();
                 double lat_prec = 0, lat_found = 0;// = entLoc.getLatitude();
@@ -162,7 +179,7 @@ public class EntityRetriever {
         geocoder = GeocoderFactory.getGeocoder("google");
         for (PersistentEntity ent : pEntities){
           //if (ent.getLocations().size() > 0)
-          //  if (ent.getLocations().get(0).getAddress().contains("Rua Joana AngŽlica, 40"))
+          //  if (ent.getLocations().get(0).getAddress().contains("Rua Joana Angï¿½lica, 40"))
           ent = setGeoLocations(ent, geocoder);
           //break;
         }

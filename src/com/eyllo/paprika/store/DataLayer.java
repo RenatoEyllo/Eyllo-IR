@@ -1,11 +1,14 @@
-package com.eyllo.paprika.entity.store;
+package com.eyllo.paprika.store;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.gora.cassandra.query.CassandraQuery;
 import org.apache.gora.cassandra.store.CassandraStore;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.PersistentBase;
+import org.apache.gora.query.Query;
+import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.util.GoraException;
@@ -82,6 +85,36 @@ public class DataLayer <K, T extends PersistentBase>{
     }
 
     /**
+     * Performs a getRequest
+     * @param pDataStoreName
+     * @param pKey
+     * @return
+     */
+    public Object getRequests(String pDataStoreName, String pDataStoreType, K pStartKey, K pEndKey){
+      LOGGER.debug("Performing get requests for " + pDataStoreName + " - " + pDataStoreType);
+      Object obj = null;
+      if (pDataStoreType.equals("cassandra"))
+        obj = getCassandraRequests(pDataStoreName, pStartKey, pEndKey);
+      return obj;
+    }
+    
+    /**
+     * Performing a query specific to the Cassandra data store
+     * @param pDataStoreName
+     * @param pStartKey
+     * @param pEndKey
+     * @return
+     */
+    public Object getCassandraRequests(String pDataStoreName, K pStartKey, K pEndKey){
+      DataStore<K, T> dataStore = getDataStore(pDataStoreName);
+      Query<K, T> query = new CassandraQuery<K, T>();
+      query.setEndKey(pStartKey);
+      query.setEndKey(pEndKey);
+      Object obj = dataStore.execute(query);
+      return obj;
+    }
+
+    /**
      * Performs a putRequest
      * @param pDataStoreName
      * @param pKey
@@ -92,6 +125,22 @@ public class DataLayer <K, T extends PersistentBase>{
       DataStore<K, T> dataStore = getDataStore(pDataStoreName);
       dataStore.put(pKey, pValue);
       dataStore.flush();
+    }
+
+    /**
+     * Performs a putRequest
+     * @param pDataStoreName
+     * @param pKey
+     * @param pValue
+     * @return 
+     */
+    public Result<K, T> getRequests(String pDataStoreName, K pStartKey, K pEndKey){
+      LOGGER.debug("Performing get requests for " + pDataStoreName);
+      DataStore<K, T> dataStore = getDataStore(pDataStoreName);
+      Query<K, T> query = new CassandraQuery<K, T>();
+      query.setStartKey(pStartKey);
+      query.setEndKey(pEndKey);
+      return dataStore.execute(query);
     }
 
     /**

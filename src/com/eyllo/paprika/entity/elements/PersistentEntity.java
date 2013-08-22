@@ -16,11 +16,13 @@
  *limitations under the License.
  */
 
-package com.eyllo.paprika.entity.generated;
+package com.eyllo.paprika.entity.elements;
 
 import java.nio.ByteBuffer;
+import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 import org.apache.avro.Protocol;
 import org.apache.avro.Schema;
@@ -41,7 +43,8 @@ import org.apache.gora.persistency.StatefulHashMap;
 import org.apache.gora.persistency.ListGenericArray;
 
 import com.eyllo.paprika.entity.EntityUtils;
-import com.eyllo.paprika.entity.generated.PersistentPoint;
+import com.eyllo.paprika.entity.elements.PersistentPoint;
+import com.eyllo.paprika.html.parser.ConstantsParser;
 import com.eyllo.paprika.html.parser.ParseUtils;
 
 @SuppressWarnings("all")
@@ -413,50 +416,105 @@ public class PersistentEntity extends PersistentBase {
    * "text":"Barro Preto",
    * "location":{"longitude":-43.952023,"latitude":-19.921711},
    * "type":"text",
-   * "infobox":{"text":"Avenida Augusto de Lima n.º 1313 - Barro Preto , Belo Horizonte","title":"Barro Preto"}
+   * "infobox":{"text":"Avenida Augusto de Lima n.�� 1313 - Barro Preto , Belo Horizonte","title":"Barro Preto"}
    * }
    * @return
    */
   // TODO get a better way to get the necessary information
   public String toJson(){
-    Map jsonMap = new HashMap();
-    StringBuilder strBuilder = new StringBuilder();
-    jsonMap.put(EntityUtils.SCENARIO_ID, this.getScenarioId());
-    jsonMap.put("userId", 2);
-    jsonMap.put("title", this.getName().toString());
-    // extra info
-    for (Utf8 eInfo : this.getExtraInfo())
-      strBuilder.append(eInfo.toString()).append(ParseUtils.INFO_SEP);
-    jsonMap.put("text", strBuilder.toString());
-    //location
-    Map infoBox = new HashMap();
-    Map geoJson = new HashMap();
-    ///ArrayList<EylloLocation> locList = (ArrayList<EylloLocation>) this.properties.get(EntityUtils.LOCATION);
-    PersistentPoint entLoc = this.getPersistentpoint();
-    ///for(EylloLocation entLoc : locList){
-      geoJson.put("type", "Point");
-      ///List<Double> coordinates = new ArrayList();
-      ///coordinates.add(entLoc.getLongitude());
-      ///coordinates.add(entLoc.getLatitude());
-      geoJson.put("coordinates", entLoc.getCoordinates());
-      geoJson.put("accuracy", entLoc.getAccuracy());
-      //jsonMap.put("location", entLoc.getAttribMap());
-      infoBox.put("text", entLoc.getAddress().toString());
-    ///}
-    jsonMap.put("type", "text");
-    //infobox
-    infoBox.put(EntityUtils.HOME_PAGE, this.getHomepage().toString());
-    /// telephones
-    strBuilder.delete(0, strBuilder.length()-1);
-    for (Utf8 phone : this.getTelephones())
-      strBuilder.append(phone.toString()).append(ParseUtils.INFO_SEP);
-    /// services
-    strBuilder.delete(0, strBuilder.length()-1);
-    for (Utf8 service : this.getServices())
-      strBuilder.append(service.toString()).append(ParseUtils.INFO_SEP);
-    infoBox.put(EntityUtils.SCHEDULE, this.getSchedule().toString());
-    jsonMap.put("infobox", infoBox);
-    jsonMap.put("loc", geoJson);
-    return ParseUtils.getJsonObj(jsonMap).toJSONString();
+    try{
+      Map jsonMap = new HashMap();
+      StringBuilder strBuilder = new StringBuilder();
+      //TODO change the iterator value
+      jsonMap.put(EntityUtils.SCENARIO_ID, this.getScenarioId().iterator().next());
+      jsonMap.put("userId", 27);
+      jsonMap.put("title", this.getName()!=null?this.getName().toString():"");
+      // extra info
+      for (Utf8 eInfo : this.getExtraInfo())
+        strBuilder.append(eInfo.toString()).append(ConstantsParser.INFO_SEP);
+      jsonMap.put("text", strBuilder.toString());
+      //location
+      Map infoBox = new HashMap();
+      Map geoJson = new HashMap();
+      ///ArrayList<EylloLocation> locList = (ArrayList<EylloLocation>) this.properties.get(EntityUtils.LOCATION);
+      PersistentPoint entLoc = this.getPersistentpoint();
+      ///for(EylloLocation entLoc : locList){
+        geoJson.put("type", "Point");
+        geoJson.put("coordinates", entLoc.getCoordinates());
+        geoJson.put("accuracy", entLoc.getAccuracy());
+        //jsonMap.put("location", entLoc.getAttribMap());
+        infoBox.put("text", this.getDescription().toString() + " " + entLoc.getAddress().toString());
+      ///}
+      jsonMap.put("type", "text");
+      //infobox
+      infoBox.put(EntityUtils.HOME_PAGE, this.getHomepage()!=null?this.getHomepage().toString():"");
+      /// telephones
+      if (strBuilder.length() > 1)
+        strBuilder.delete(0, strBuilder.length()-1);
+      for (Utf8 phone : this.getTelephones())
+        strBuilder.append(phone.toString()).append(ConstantsParser.INFO_SEP);
+      /// services
+      if (strBuilder.length() > 1)
+        strBuilder.delete(0, strBuilder.length()-1);
+      for (Utf8 service : this.getServices())
+        strBuilder.append(service.toString()).append(ConstantsParser.INFO_SEP);
+      infoBox.put(EntityUtils.SCHEDULE, this.getSchedule()!=null?this.getSchedule().toString():"");
+      //infoBox.put("extraInfo", strBuilder.toString());
+      jsonMap.put("infobox", infoBox);
+      jsonMap.put("loc", geoJson);
+      return ParseUtils.getJsonObj(jsonMap).toJSONString();
+    }catch(Exception e){
+      e.printStackTrace();
+      return "";
+    }
+  }
+
+  public Map<String, Object> toMap(){
+    Map<String, Object> resMap = new HashMap<String, Object>();
+    Map<String, Object> sameAsMap = new HashMap<String, Object>();
+    //TODO create job to update twitter user
+    resMap.put("twUserId","0");
+    resMap.put("description", UtilsElements.toString(this.getDescription()));
+    //TODO this should be an array
+    resMap.put("assets", UtilsElements.toString(this.getAssets()));
+    resMap.put("name", UtilsElements.toString(this.getName()));
+    resMap.put("homepage", UtilsElements.toString(this.getHomepage()));
+    resMap.put("label", UtilsElements.toString(this.getLabel()));
+    resMap.put("logo", UtilsElements.toString(this.getLogo()));
+    resMap.put("industry", UtilsElements.toString(this.getIndustry()));
+    resMap.put("foundation", UtilsElements.toString(this.getFoundation()));
+    resMap.put("foundationPlace", UtilsElements.toString(this.getFoundationPlace()));
+    resMap.put("foundingYear", new Date());
+    resMap.put("scenarioId", UtilsElements.toIntArray(this.getScenarioId()));
+    resMap.put("services", UtilsElements.toStringArray(this.getServices()));
+    resMap.put("telephones", UtilsElements.toStringArray(this.getTelephones()));
+    resMap.put("products", UtilsElements.toStringArray(this.getProducts()));
+    resMap.put("schedule", UtilsElements.toString(this.getSchedule()));
+    resMap.put("thumbnail", UtilsElements.toString(this.getThumbnail()));
+    // sameAs properties
+    sameAsMap.put("type", "object");
+    sameAsMap.put("sameAsExtended", UtilsElements.sameAsToMapArray(this.getSameAs()));
+    resMap.put("sameAs", sameAsMap);
+    // location properties
+    resMap.put("locations", UtilsElements.locationsToMapArray(this.getPersistentpoint()));
+    resMap.put("image", "");
+    resMap.put("video", "");
+    resMap.put("extraInfo", UtilsElements.toStringArray(this.getExtraInfo()));
+    /**
+            "locations": 
+            {
+                "type": "object",
+                "_comment_" : "Used as an array of locations",
+                "properties" : {
+                    "locStreetAddress" : {"type" : "string"},
+                    "locState" : {"type" : "string"},
+                    "locCountry" : {"type" : "string"},
+                    "geoPoint" : {"type" : "geo_point"}
+                }, 
+                "index_name" : "locations"
+            },
+        }
+     */
+    return resMap;
   }
 }

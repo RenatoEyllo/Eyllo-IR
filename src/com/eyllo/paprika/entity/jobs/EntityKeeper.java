@@ -9,9 +9,10 @@ import org.apache.gora.util.GoraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eyllo.paprika.entity.generated.PersistentEntity;
-import com.eyllo.paprika.entity.store.DataLayer;
+import com.eyllo.paprika.entity.elements.PersistentEntity;
 import com.eyllo.paprika.html.parser.ParseUtils;
+import com.eyllo.paprika.html.parser.RioGuiaParser;
+import com.eyllo.paprika.store.DataLayer;
 
 /**
  * @author renatomarroquin
@@ -40,7 +41,7 @@ public class EntityKeeper {
   public static void main(String[] args) {
     EntityKeeper entKeeper = new EntityKeeper();
     String dataStoreType = "cassandra";
-    String entitiesSource = "vejaRio";
+    String entitiesSource = RioGuiaParser.NAME;
     if (args.length > 2){
         dataStoreType = args[0];
         entitiesSource = args[1];
@@ -54,9 +55,9 @@ public class EntityKeeper {
     //ParseUtils.printPersistentEntities(entKeeper.entities);
     //entKeeper.entities = EntityRetriever.getGeoValidatedEntities(entKeeper.entities);
     /** Saves entities within its specific store */
-    //saveEntities(dataStoreType, entKeeper.entities);
+    saveEntities(dataStoreType, entKeeper.entities);
     /** Verifies all entities stored */
-    //verifyEntities(entKeeper.entities);
+    verifyEntities(dataStoreType, entKeeper.entities);
   }
 
     /**
@@ -83,8 +84,10 @@ public class EntityKeeper {
       return flgSuccess;
     }
 
-  public static void verifyEntities(List<PersistentEntity> pEntities){
+  public static void verifyEntities(String pDataStoreType, List<PersistentEntity> pEntities){
     boolean flgVerif = true;
+    DataLayer<String, PersistentEntity> nKeepr = new DataLayer<String, PersistentEntity>();
+    Object obj = nKeepr.getRequests(ENT_STORE_NAME, pDataStoreType, null, null);
     if ( flgVerif )
       LOGGER.info("All entities were persisted and retrieved successfully");
     else

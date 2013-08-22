@@ -15,10 +15,12 @@ import org.slf4j.LoggerFactory;
 
 import com.eyllo.paprika.entity.elements.EylloLink;
 import com.eyllo.paprika.entity.elements.EylloLocation;
-import com.eyllo.paprika.entity.generated.PersistentEntity;
-import com.eyllo.paprika.entity.generated.PersistentPoint;
+import com.eyllo.paprika.entity.elements.PersistentEntity;
+import com.eyllo.paprika.entity.elements.PersistentPoint;
 
 public class PaginasAmarillasParser {
+
+  public static final Object NAME = "paginasAmarillas";
 
   private List<PersistentEntity> pEntities;
   //http://www.paginasamarillas.com.pe/resultVertical.do?keyword=hoteles&status=P&fromBox=searchBox&seed=67436&stateId=arequipa&cityId=&suburbId=&verticalId=2#
@@ -29,7 +31,7 @@ public class PaginasAmarillasParser {
   
   //private static String DEFAULT_PA_SEARCH_URL = "/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/res/paginasAmarillas/HotelesArequipa.html";//"http://www.paginasamarillas.com.pe/s/hoteles/30/50";
   private static String DEFAULT_PA_SEARCH_URL = "http://www.paginasamarillas.com.pe/s/PLACE_PARAM/"+ NUM_PARAM_STR+"/50";
-  private static String places[] = {"hoteles", "restaurantes-+carnes+y+parrilladas"};
+  private static String places[] = {"restaurantes-+carnes+y+parrilladas"};//, "hoteles"};
 //  private static String DEFAULT_PA_ENT_URL = "/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/res/paginasAmarillas/CasonaPlazaHotel.html";
   
   private static Integer DEFAULT_SCENARIOID = 5;
@@ -58,22 +60,22 @@ public class PaginasAmarillasParser {
    * Gets entities from an specific URL
    * @return
    */
-  public static List<PersistentEntity> getEntities(){
-    PaginasAmarillasParser paParser = new PaginasAmarillasParser();
+  public List<PersistentEntity> getEntities(){
     for (String place : places){
+      LOGGER.debug("Parsing Entities from: " + place);
       String url = DEFAULT_PA_SEARCH_URL.replaceAll(PLACE_PARAM_STR, place);
-      int iCnt = 1;
+      int iCnt = 0;
       while (verifySearchUrl(url.replace(NUM_PARAM_STR, String.valueOf(iCnt)))){
-        paParser.parseSearchResults(url.replace(NUM_PARAM_STR, String.valueOf(iCnt)));
-        iCnt+=100;
-        System.out.println("algo pasa");
-        break;
+        iCnt+=1;
+        System.out.println("Getting: "+ url.replace(NUM_PARAM_STR, String.valueOf(iCnt)));
+        this.parseSearchResults(url.replace(NUM_PARAM_STR, String.valueOf(iCnt)));
+        //break;
       }
-      System.out.println("Hubo # entidades : " + paParser.totalEntities());
+      LOGGER.info("Hubo # entidades : " + this.totalEntities());
     }
     LOGGER.info("Complete information");
-    paParser.completeEntityInfo();
-    return paParser.pEntities;
+    this.completeEntityInfo();
+    return this.pEntities;
   }
 
   /**
@@ -81,7 +83,7 @@ public class PaginasAmarillasParser {
    * @param pUrl
    * @return
    */
-  public static boolean verifySearchUrl(String pUrl){
+  public boolean verifySearchUrl(String pUrl){
     LOGGER.info("Verifying: " + pUrl);
     boolean flgValidated = true;
     Document doc = null;
@@ -92,6 +94,9 @@ public class PaginasAmarillasParser {
     return flgValidated;
   }
 
+  /**
+   * Completes entity's information
+   */
   public void completeEntityInfo(){
     if (this.pEntities != null & this.pEntities.size() >0)
       for (PersistentEntity ent : this.pEntities){
@@ -109,6 +114,7 @@ public class PaginasAmarillasParser {
       
       // Reading individual URLs
       doc = ParseUtils.connectGetUrl(ParseUtils.getUri(pairs.getKey().toString()).toASCIIString());
+      LOGGER.debug("Parsing entity from: " + ParseUtils.getUri(pairs.getKey().toString()).toASCIIString());
       doc.setBaseUri(DEFAULT_PA_URL);
       Elements extraInfos = doc.select("div.acerca");
       
@@ -121,31 +127,31 @@ public class PaginasAmarillasParser {
           for (Element datum : datums){
             String datumText = datum.text().toLowerCase();
             if (datumText.contains("actividad:"))
-              pEntity.setIndustry(new Utf8(datumText.replace("actividad:", "")));
+              pEntity.setIndustry(new Utf8(ParseUtils.toCamelCase(datumText.replace("actividad:", ""))));
             else if (datumText.contains("formas de pago:"))
-              pEntity.addToExtraInfo(new Utf8(datumText));
+              pEntity.addToExtraInfo(new Utf8(ParseUtils.toCamelCase(datumText)));
             else if (datumText.contains("tipo de alojamiento:"))
-              pEntity.setLabel(new Utf8(datumText.replace("tipo de alojamiento:", "")));
+              pEntity.setLabel(new Utf8(ParseUtils.toCamelCase(datumText.replace("tipo de alojamiento:", ""))));
             else if (datumText.contains("sucursal")){
               String locStrings[] = datumText.substring(datumText.indexOf(":") + 1, datumText.length()).split("tlf.");
               if (locStrings.length == 2){
-                pEntity.getPersistentpoint().setAddress(new Utf8(locStrings[0]));
-                pEntity.addToTelephones(new Utf8(locStrings[1]));
+                pEntity.getPersistentpoint().setAddress(new Utf8(ParseUtils.toCamelCase(locStrings[0])));
+                pEntity.addToTelephones(new Utf8(ParseUtils.toCamelCase(locStrings[1])));
               }
             }
             else if (datumText.contains("sitio web:")){
-              Utf8 hPage = new Utf8(datumText.replace("sito web:", ""));
+              Utf8 hPage = new Utf8(datumText.replace("sitio web:", ""));
               pEntity.setHomepage(hPage);
               pEntity.putToSameAs(hPage, hPage);
             }
             else if (datumText.contains("areas comunes:"))
-              pEntity.addToExtraInfo(new Utf8(datumText));
+              pEntity.addToExtraInfo(new Utf8(ParseUtils.toCamelCase(datumText)));
             else if (datumText.contains("formas de pago:"))
-              pEntity.addToExtraInfo(new Utf8(datumText));
+              pEntity.addToExtraInfo(new Utf8(ParseUtils.toCamelCase(datumText)));
             else if (datumText.contains("servicios generales:")){
               String serStrings[] = datumText.split(",");
               for (String serString : serStrings)
-                pEntity.addToServices(new Utf8(serString));
+                pEntity.addToServices(new Utf8(ParseUtils.toCamelCase(serString)));
             }
           }
         }
@@ -157,11 +163,12 @@ public class PaginasAmarillasParser {
            int poss = geoString.indexOf("),");
            geoString = geoString.replace(geoString.substring(poss, geoString.length()),"");
            String coordinates[] = geoString.trim().split(",");
-           System.out.println(geoString);
-           pEntity.getPersistentpoint().addToCoordinates(Double.parseDouble(coordinates[0]));
+           // longitude
            pEntity.getPersistentpoint().addToCoordinates(Double.parseDouble(coordinates[1]));
+           // latitude
+           pEntity.getPersistentpoint().addToCoordinates(Double.parseDouble(coordinates[0]));
+           // accuracy
            pEntity.getPersistentpoint().setAccuracy(EylloLocation.GEOCODER_VERIF_ACC_HIGH);
-           //System.out.println(pEntity);
          }
     }
   }
@@ -171,7 +178,7 @@ public class PaginasAmarillasParser {
    * @param pUrl
    */
   public void parseSearchResults(String pUrl){
-    LOGGER.info("Started parsing: " + pUrl);
+    LOGGER.debug("Started parsing: " + pUrl);
     //File input = new File(pUrl);
     Document doc = null;
     
@@ -213,14 +220,14 @@ public class PaginasAmarillasParser {
             //System.out.println(extraElements.get(iCnt).ownText());
             break;
           default:
-              LOGGER.info("Extra elements found but not considered: " + extraElements.get(iCnt));
+              LOGGER.debug("Extra elements found but not considered: " + extraElements.get(iCnt));
         }// END-SWITCH
       }// END-FOR EXTRA_ELEMS
       this.pEntities.add(pEnt);
     }// END-FOR RESULTS
     //System.out.println(results.size());
     //ParseUtils.printPersistentEntities(pEntities);
-    LOGGER.info("Finished parsing: " + pUrl);
+    LOGGER.debug("Finished parsing: " + pUrl);
   }
 
   /**
@@ -243,9 +250,10 @@ public class PaginasAmarillasParser {
    * @param args
    */
   public static void main(String[] args) {
-    //PaginasAmarillasParser pa = new PaginasAmarillasParser();
+    PaginasAmarillasParser pa = new PaginasAmarillasParser();
     //pa.parseSearchResults(DEFAULT_PA_SEARCH_URL);
-    PaginasAmarillasParser.getEntities();
+    //pa.getEntities();
+    ParseUtils.writeJsonFile(pa.getEntities(), "/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/res/paginasAmarillas.json");
   }
 
 }

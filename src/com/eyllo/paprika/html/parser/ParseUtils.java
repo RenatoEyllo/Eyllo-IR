@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.eyllo.paprika.entity.elements.EylloLink;
-import com.eyllo.paprika.entity.generated.PersistentEntity;
+import com.eyllo.paprika.entity.elements.PersistentEntity;
 
 public class ParseUtils {
 
@@ -29,9 +29,7 @@ public class ParseUtils {
    * Logger to help us write write info/debug/error messages
    */
   private static Logger LOGGER = LoggerFactory.getLogger(ParseUtils.class);
-  public static String INFO_SEP = " - ";
-  public static int MAX_CONN_TIME = 60000;
-  
+
   /**
    * Default encoding for reading portuguese pages
    */
@@ -78,6 +76,7 @@ public class ParseUtils {
     }
     return uri;
   }
+
   /**
    * Connects to a specific URL and returns its document
    * @param pUrl
@@ -86,7 +85,7 @@ public class ParseUtils {
   public static Document connectGetUrl(String pUrl){
     Document doc = null;
     try {
-      doc = Jsoup.connect(pUrl).timeout(MAX_CONN_TIME).get();
+      doc = Jsoup.connect(pUrl).timeout(ConstantsParser.MAX_CONN_TIME).get();
     } catch (IOException e) {
       LOGGER.error("Error while connecting to " + pUrl);
       e.printStackTrace();
@@ -94,18 +93,28 @@ public class ParseUtils {
     return doc;
   }
 
+  /**
+   * Method in charged of writing a list of entities into a file
+   * @param pEntities   List of entities to be persisted.
+   * @param pFilePath   File path where entities will be written.
+   */
   public static void writeJsonFile(List<PersistentEntity> pEntities, String pFilePath){
     Writer fileWriter = null;
     try {
       fileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(pFilePath), Charset.forName(UTF8_ENCODING)));
-      for (PersistentEntity ent : pEntities)
+      for (PersistentEntity ent : pEntities){
+        if ( ent != null && ent.getPersistentpoint() != null && 
+             ent.getPersistentpoint().getAddress() != null &&
+            !ent.getPersistentpoint().getAddress().toString().equals("") &&
+            ent.getPersistentpoint().getCoordinates().size() > 0)
         fileWriter.write(ent.toJson().concat("\n"));
+      }
       fileWriter.close();
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
-  
+
   /**
    * Method to build a JSONObject from a HashMap
    * @param tmp
@@ -130,5 +139,27 @@ public class ParseUtils {
   public static void printPersistentEntities(List<PersistentEntity> pEntities){
     for (PersistentEntity ent : pEntities)
       System.out.println(ent.toString());
+  }
+  
+  /**
+   * Method that will let us camel case strings
+   * @param init
+   * @return
+   */
+  public static String toCamelCase(final String init) {
+    if (init==null)
+        return null;
+
+    final StringBuilder ret = new StringBuilder(init.length());
+
+    for (final String word : init.split(" ")) {
+        if (!word.isEmpty()) {
+            ret.append(Character.toUpperCase(word.charAt(0)));
+            ret.append(word.substring(1).toLowerCase());
+        }
+        if (!(ret.length()==init.length()))
+            ret.append(" ");
+    }
+    return ret.toString().trim();
   }
 }
