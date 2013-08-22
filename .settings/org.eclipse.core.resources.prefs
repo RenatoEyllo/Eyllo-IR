@@ -1,2 +1,10 @@
 eclipse.preferences.version=1
+encoding//res/apontador/apontador-hotels.1492.json=UTF-8
+encoding//res/paginasAmarillas/output/paginasAmarillas.json=UTF-8
+encoding//res/rioguia/rioGuia.json=UTF-8
+encoding//src/com/eyllo/paprika/entity/elements/PersistentEntity.java=UTF-8
+encoding//src/com/eyllo/paprika/entity/jobs/EntityRetriever.java=UTF-8
+encoding//src/com/eyllo/paprika/html/parser/ApontadorParser.java=UTF-8
+encoding//src/com/eyllo/paprika/html/parser/PaginasAmarillasParser.java=UTF-8
 encoding//src/com/eyllo/paprika/html/parser/TeleListasParser.java=UTF-8
+encoding//src/com/eyllo/paprika/html/parser/VejaRioParser.java=UTF-8
