@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.eyllo.paprika.entity.elements.EylloLink;
-import com.eyllo.paprika.entity.elements.EylloLocation;
-import com.eyllo.paprika.html.parser.ParseUtils;
+import com.eyllo.paprika.retriever.parser.ParseUtils;
+import com.eyllo.paprika.retriever.parser.elements.EylloLink;
+import com.eyllo.paprika.retriever.parser.elements.EylloLocation;
 
 public class Entity {
 
