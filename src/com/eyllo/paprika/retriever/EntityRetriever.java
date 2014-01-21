@@ -3,6 +3,10 @@
  */
 package com.eyllo.paprika.retriever;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -49,8 +53,24 @@ public class EntityRetriever {
    */
   public static void main(String[] args) {
       // 1. Retrieve entities
-    AbstractParser absParser = new SPTransParser(100, 100, true);
-      EntityRetriever entRet = new EntityRetriever();
+    AbstractParser absParser = null; //new SPTransParser(100, 100, true);
+    EntityRetriever entRet = new EntityRetriever();
+    Properties prop = new Properties();
+  	InputStream input = null;
+   
+    try {
+        input = new FileInputStream("/home/renato/workspace/Eyllo-IR/conf/retriever.properties");
+        // load a properties file
+        prop.load(input);
+        entRet.initiateRetriever(prop);
+	} catch (FileNotFoundException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+  		
       //entRet.entities = new ApontadorParser("hotels", 50, 20).getEntities();
       absParser.fetchEntities();
       //absParser.completeEntityInfo();
@@ -68,6 +88,7 @@ public class EntityRetriever {
 
   public void initiateRetriever(Properties pParserProperties) {
     AbstractParser absParser = getCorrectParser(pParserProperties);
+    System.out.println(absParser.getParserName());
   }
 
   private AbstractParser getCorrectParser(Properties pParserProps) {
@@ -77,33 +98,33 @@ public class EntityRetriever {
 
     String tmpValue = pParserProps.getProperty(EntityRetrieverConstants.RPARSER_MAXPAGENUM);
     if (tmpValue != null)
-      initargs.add(pParserProps.getProperty(EntityRetrieverConstants.RPARSER_MAXPAGENUM));
+      initargs.add(tmpValue);
     tmpValue = pParserProps.getProperty(EntityRetrieverConstants.RPARSER_MAXNUMENT);
     if (tmpValue != null)
-      initargs.add(pParserProps.getProperty(EntityRetrieverConstants.RPARSER_MAXNUMENT));
-    tmpValue = pParserProps.getProperty(EntityRetrieverConstants.RPARSER_NAME);
-    if (tmpValue != null)
-      initargs.add(pParserProps.getProperty(EntityRetrieverConstants.RPARSER_NAME));
+      initargs.add(tmpValue);
+    
     tmpValue = pParserProps.getProperty(EntityRetrieverConstants.RPARSER_FETCHURL);
     if (tmpValue != null)
-      initargs.add(pParserProps.getProperty(EntityRetrieverConstants.RPARSER_FETCHURL));
+      initargs.add(tmpValue);
     tmpValue = pParserProps.getProperty(EntityRetrieverConstants.RPARSER_OUTPATH);
     if (tmpValue != null)
-      initargs.add(pParserProps.getProperty(EntityRetrieverConstants.RPARSER_OUTPATH));
+      initargs.add(tmpValue);
     tmpValue = pParserProps.getProperty(EntityRetrieverConstants.RPARSER_LOCALSEARCH);
     if (tmpValue != null)
-      initargs.add(pParserProps.getProperty(EntityRetrieverConstants.RPARSER_LOCALSEARCH));
+      initargs.add(tmpValue);
     tmpValue = pParserProps.getProperty(EntityRetrieverConstants.RPARSER_REQPOLITENESS);
     if (tmpValue != null)
-      initargs.add(pParserProps.getProperty(EntityRetrieverConstants.RPARSER_REQPOLITENESS));
+      initargs.add(tmpValue);
 
-    Class<?>[] parameters = new Class<?>[initargs.size()];
     //int pMaxPageNumber, int pMaxNumEntities,
     //String pName, String pOutPath, String pFetchUrl,
     //boolean pLocal, int pPoliteness
     try {
-      Constructor<?> constr = Class.forName(pParserProps.getProperty(EntityRetrieverConstants.RPARSER_NAME)).getConstructor(parameters);
-      parser = (AbstractParser) constr.newInstance(initargs.toArray());
+      tmpValue = this.getParserClassName(pParserProps.getProperty(EntityRetrieverConstants.RPARSER_NAME));
+      if (tmpValue != null) {
+        Constructor<?> constr = Class.forName(tmpValue).getConstructor(initargs.getClass().getClasses());
+        parser = (AbstractParser) constr.newInstance(initargs.toArray());  
+      }
     } catch (NoSuchMethodException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -170,6 +191,30 @@ public class EntityRetriever {
       return entRet.entities;
     }
 
+    /**
+     * Gets a parser class name according to its predefined name.
+     * @param pParserName
+     * @return
+     */
+    public String getParserClassName(String pParserName) {
+    	String parserClassName = null;
+        if (pParserName.equals(VejaRioParser.NAME)){
+          parserClassName = VejaRioParser.class.getName();
+        }
+        else if (pParserName.equals(SPTransParser.getParserName())){
+        	parserClassName = SPTransParser.class.getName();
+        }
+        else if (pParserName.equals(RioGuiaParser.NAME)){
+          parserClassName = RioGuiaParser.class.getName();
+        }
+        else if (pParserName.equals(VejaSaoPauloParser.NAME)){
+          parserClassName = VejaSaoPauloParser.class.getName();
+        }
+        else if (pParserName.equals(ApontadorParser.NAME)){
+          parserClassName = ApontadorParser.class.getName();
+        }
+        return parserClassName;
+    }
     /**
      * Verifies the geolocalization obtained for each entity
      * @param pEntities

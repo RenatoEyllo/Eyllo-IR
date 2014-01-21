@@ -18,7 +18,7 @@ import com.eyllo.paprika.retriever.parser.elements.PersistentEntity;
 public abstract class AbstractParser {
 
   /**  Parser name. */
-  private String parserName;
+  static private String parserName;
 
   /** Scenario Id used */
   private int scenarioId;
@@ -64,9 +64,9 @@ public abstract class AbstractParser {
    * @param pPoliteness  Time to wait between external request.
    */
   public AbstractParser(int pMaxPageNumber, int pMaxNumEntities,
-      String pName, String pFetchUrl, String pOutPath,
+      String pFetchUrl, String pOutPath,
       boolean pLocal, int pPoliteness) {
-    initialize(pMaxPageNumber, pMaxNumEntities, pName, pOutPath, pFetchUrl, pLocal, pPoliteness);
+    initialize(pMaxPageNumber, pMaxNumEntities, pOutPath, pFetchUrl, pLocal, pPoliteness);
   }
 
   /**
@@ -77,9 +77,9 @@ public abstract class AbstractParser {
    * @param pFetchUrl
    */
   public AbstractParser(int pMaxPageNumber, int pMaxNumEntities,
-      String pName, String pFetchUrl) {
+      String pFetchUrl) {
     initialize(pMaxPageNumber, pMaxNumEntities,
-        pName, ParserConstants.DEFAULT_OUTPUT_PATH, pFetchUrl,
+        ParserConstants.DEFAULT_OUTPUT_PATH, pFetchUrl,
         ParserConstants.DEFAULT_USE_LOCAL, ParserConstants.DEFAULT_REQ_POLITENESS);
   }
 
@@ -90,9 +90,9 @@ public abstract class AbstractParser {
    * @param pName   Parser name.
    * @param pFetchUrl   To get entities from.
    */
-  public AbstractParser(String pName, String pFetchUrl) {
+  public AbstractParser(String pFetchUrl) {
     initialize(Integer.MAX_VALUE, Integer.MAX_VALUE,
-        pName, ParserConstants.DEFAULT_OUTPUT_PATH, pFetchUrl,
+        ParserConstants.DEFAULT_OUTPUT_PATH, pFetchUrl,
         ParserConstants.DEFAULT_USE_LOCAL, ParserConstants.DEFAULT_REQ_POLITENESS);
   }
 
@@ -107,12 +107,11 @@ public abstract class AbstractParser {
    * @param pPoliteness Time to wait between external request.
    */
   public void initialize(int pMaxPageNumber, int pMaxNumEntities,
-      String pName, String pOutPath, String pFetchUrl,
+      String pOutPath, String pFetchUrl,
       boolean pUseLocal, int pPoliteness) {
     pEntities = new ArrayList<PersistentEntity> ();
     maxPageNumber = pMaxPageNumber;
     maxNumEntities = pMaxNumEntities;
-    parserName = pName;
     outPath = pOutPath;
     fetchUrl = pFetchUrl;
     setUseLocal(pUseLocal);
@@ -232,16 +231,16 @@ public abstract class AbstractParser {
    * Gets the parser name.
    * @return name of the parser.
    */
-  public String getParserName() {
-    return this.parserName;
+  public static String getParserName() {
+    return parserName;
   }
 
   /**
    * Sets the parser name
    * @param parserName Parser name to be used.
    */
-  public void setName(String parserName) {
-    this.parserName = parserName;
+  public static void setName(String pName) {
+    parserName = pName;
   }
 
   /**

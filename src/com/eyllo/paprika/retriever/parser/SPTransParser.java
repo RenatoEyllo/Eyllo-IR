@@ -22,8 +22,14 @@ import com.eyllo.paprika.retriever.parser.elements.PersistentPoint;
  */
 public class SPTransParser extends AbstractParser {
 
-  /** Parser name. */
-  private static final String name = "sptrans";
+	/**
+	   * Gets the parser name.
+	   * @return name of the parser.
+	   */
+	  public static String getParserName() {
+	    return "sptrans";
+	  }
+
   private static final String HOME_PAGE = "http://www.sptrans.com.br/";
 
   /** Default API URL. */
@@ -60,7 +66,7 @@ public class SPTransParser extends AbstractParser {
    * @param pMaxNumEntities maximum number of entities to be obtained.
    */
   public SPTransParser(int pMaxPageNumber, int pMaxNumEntities, boolean pLocal) {
-    super(pMaxPageNumber, pMaxNumEntities, name,
+    super(pMaxPageNumber, pMaxNumEntities,
         ParserConstants.DEFAULT_OUTPUT_PATH, OLHOVIVO_DEFAULT_API_URL,
         pLocal, ParserConstants.DEFAULT_REQ_POLITENESS);
     this.setAuthCookie(getCookieSpAuthenticate());
@@ -71,8 +77,8 @@ public class SPTransParser extends AbstractParser {
    * Default constructor.
    */
   public SPTransParser() {
-    super(Integer.MAX_VALUE, Integer.MAX_VALUE, name, OLHOVIVO_DEFAULT_API_URL);
-    getLogger().info("Running parser " + name + " using MAX values for retrieving.");
+    super(Integer.MAX_VALUE, Integer.MAX_VALUE, OLHOVIVO_DEFAULT_API_URL);
+    getLogger().info("Running parser " + getParserName() + " using MAX values for retrieving.");
     this.setAuthCookie(getCookieSpAuthenticate());
   }
 
