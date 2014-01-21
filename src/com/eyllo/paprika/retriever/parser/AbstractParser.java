@@ -64,7 +64,7 @@ public abstract class AbstractParser {
    * @param pPoliteness  Time to wait between external request.
    */
   public AbstractParser(int pMaxPageNumber, int pMaxNumEntities,
-      String pName, String pOutPath, String pFetchUrl,
+      String pName, String pFetchUrl, String pOutPath,
       boolean pLocal, int pPoliteness) {
     initialize(pMaxPageNumber, pMaxNumEntities, pName, pOutPath, pFetchUrl, pLocal, pPoliteness);
   }
