@@ -3,10 +3,13 @@
  */
 package com.eyllo.paprika.retriever;
 
-import static com.eyllo.paprika.retriever.EntityRetrieverConstants.DEFAULT_JSON_OUTPUT;
-
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 //import org.bingmaps.rest.models.Confidence;
+
+import java.util.Properties;
 
 import org.apache.avro.generic.GenericArray;
 import org.slf4j.Logger;
@@ -15,10 +18,11 @@ import org.slf4j.LoggerFactory;
 import com.eyllo.paprika.entity.EntityUtils;
 import com.eyllo.paprika.geocoder.AbstractGeocoder;
 import com.eyllo.paprika.geocoder.GeocoderFactory;
+import com.eyllo.paprika.retriever.parser.AbstractParser;
 import com.eyllo.paprika.retriever.parser.ApontadorParser;
-import com.eyllo.paprika.retriever.parser.PaginasAmarillasParser;
-import com.eyllo.paprika.retriever.parser.ParseUtils;
+import com.eyllo.paprika.retriever.parser.ParserUtils;
 import com.eyllo.paprika.retriever.parser.RioGuiaParser;
+import com.eyllo.paprika.retriever.parser.SPTransParser;
 import com.eyllo.paprika.retriever.parser.VejaRioParser;
 import com.eyllo.paprika.retriever.parser.VejaSaoPauloParser;
 import com.eyllo.paprika.retriever.parser.elements.EylloLocation;
@@ -31,19 +35,13 @@ import com.eyllo.paprika.retriever.parser.elements.PersistentPoint;
  */
 public class EntityRetriever {
 
-  /**
-   * Entities to be retrieved.
-   */
+  /** Entities to be retrieved. */
   private List<PersistentEntity> entities;
 
-  /**
-   * Geocoder object.
-   */
+  /** Geocoder object. */
   private static AbstractGeocoder geocoder;
 
-  /**
-   * Logger to help us write write info/debug/error messages
-   */
+  /** Logger to help us write write info/debug/error messages. */
   private static Logger LOGGER = LoggerFactory.getLogger(EntityRetriever.class);
 
   /**
@@ -51,25 +49,94 @@ public class EntityRetriever {
    */
   public static void main(String[] args) {
       // 1. Retrieve entities
+    AbstractParser absParser = new SPTransParser(100, 100, true);
       EntityRetriever entRet = new EntityRetriever();
-      entRet.entities = new ApontadorParser("hotels", 50, 20).getEntities();
+      //entRet.entities = new ApontadorParser("hotels", 50, 20).getEntities();
+      absParser.fetchEntities();
+      //absParser.completeEntityInfo();
+      ParserUtils.writeJsonFile(absParser.getEntities(), absParser.getOutputFileName());
+      //entRet.entities = absParser.getEntities();
+
       // 2. Store entities
       // 3. Complete entities information
       //entRet.entities = updateGeoInfo(entRet.entities);
       //entRet.entities = verifyGeoInfo(entRet.entities);
       //TODO update specific parsers to return their own file name
-      ParseUtils.writeJsonFile(entRet.entities,
-          DEFAULT_JSON_OUTPUT + ApontadorParser.getOutputFileName());
+      //ParserUtils.writeJsonFile(entRet.entities,
+      //    DEFAULT_JSON_OUTPUT + absParser.getOutputFileName());
   }
 
-    /**
-     * Gets entities from a specific data source, but also validates them
-     * @param pEntitiesSource
-     * @param pEntities
-     * @return
-     */
-    public List<PersistentEntity> getGeoValidatedEntities(String pEntitiesSource, List<PersistentEntity> pEntities){
-      /** Getting the entities */
+  public void initiateRetriever(Properties pParserProperties) {
+    AbstractParser absParser = getCorrectParser(pParserProperties);
+  }
+
+  private AbstractParser getCorrectParser(Properties pParserProps) {
+    
+    AbstractParser parser = null;
+    ArrayList<Object> initargs = new ArrayList<Object>();
+
+    String tmpValue = pParserProps.getProperty(EntityRetrieverConstants.RPARSER_MAXPAGENUM);
+    if (tmpValue != null)
+      initargs.add(pParserProps.getProperty(EntityRetrieverConstants.RPARSER_MAXPAGENUM));
+    tmpValue = pParserProps.getProperty(EntityRetrieverConstants.RPARSER_MAXNUMENT);
+    if (tmpValue != null)
+      initargs.add(pParserProps.getProperty(EntityRetrieverConstants.RPARSER_MAXNUMENT));
+    tmpValue = pParserProps.getProperty(EntityRetrieverConstants.RPARSER_NAME);
+    if (tmpValue != null)
+      initargs.add(pParserProps.getProperty(EntityRetrieverConstants.RPARSER_NAME));
+    tmpValue = pParserProps.getProperty(EntityRetrieverConstants.RPARSER_FETCHURL);
+    if (tmpValue != null)
+      initargs.add(pParserProps.getProperty(EntityRetrieverConstants.RPARSER_FETCHURL));
+    tmpValue = pParserProps.getProperty(EntityRetrieverConstants.RPARSER_OUTPATH);
+    if (tmpValue != null)
+      initargs.add(pParserProps.getProperty(EntityRetrieverConstants.RPARSER_OUTPATH));
+    tmpValue = pParserProps.getProperty(EntityRetrieverConstants.RPARSER_LOCALSEARCH);
+    if (tmpValue != null)
+      initargs.add(pParserProps.getProperty(EntityRetrieverConstants.RPARSER_LOCALSEARCH));
+    tmpValue = pParserProps.getProperty(EntityRetrieverConstants.RPARSER_REQPOLITENESS);
+    if (tmpValue != null)
+      initargs.add(pParserProps.getProperty(EntityRetrieverConstants.RPARSER_REQPOLITENESS));
+
+    Class<?>[] parameters = new Class<?>[initargs.size()];
+    //int pMaxPageNumber, int pMaxNumEntities,
+    //String pName, String pOutPath, String pFetchUrl,
+    //boolean pLocal, int pPoliteness
+    try {
+      Constructor<?> constr = Class.forName(pParserProps.getProperty(EntityRetrieverConstants.RPARSER_NAME)).getConstructor(parameters);
+      parser = (AbstractParser) constr.newInstance(initargs.toArray());
+    } catch (NoSuchMethodException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (SecurityException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (ClassNotFoundException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (InstantiationException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IllegalArgumentException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (InvocationTargetException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    return parser;
+  }
+
+  /**
+   * Gets entities from a specific data source, but also validates them
+   * @param pEntitiesSource
+   * @param pEntities
+   * @return
+   */
+  public List<PersistentEntity> getGeoValidatedEntities(String pEntitiesSource, List<PersistentEntity> pEntities){
+    /** Getting the entities */
       pEntities = getEntities(pEntitiesSource);
       /** Updates entities' geolocation */
       pEntities = updateGeoInfo(pEntities);
@@ -88,15 +155,15 @@ public class EntityRetriever {
       if (pEntitiesSource.equals(VejaRioParser.NAME)){
         entRet.entities = new VejaRioParser().getEntities();
       }
-      if (pEntitiesSource.equals(PaginasAmarillasParser.NAME)){
-        entRet.entities = new PaginasAmarillasParser().getEntities();
-      }
+      //if (pEntitiesSource.equals(PaginasAmarillasParser.NAME)){
+      //  entRet.entities = new PaginasAmarillasParser().getEntities();
+      //}
       if (pEntitiesSource.equals(RioGuiaParser.NAME)){
         entRet.entities = new RioGuiaParser().getEntities();
       }
       if (pEntitiesSource.equals(VejaSaoPauloParser.NAME)){
-        entRet.entities = new VejaSaoPauloParser().getEntities();
-      }
+       entRet.entities = new VejaSaoPauloParser().getEntities();
+    }
       if (pEntitiesSource.equals(ApontadorParser.NAME)){
         entRet.entities = new ApontadorParser().getEntities();
       }

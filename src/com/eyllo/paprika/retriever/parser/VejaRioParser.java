@@ -61,9 +61,9 @@ public class VejaRioParser {
    */
   public static void main(String[] args) {
     VejaRioParser vjrParser = new VejaRioParser();
-    ParseUtils.printPersistentEntities(vjrParser.pEntities);
+    ParserUtils.printPersistentEntities(vjrParser.pEntities);
     vjrParser.parseSearchResults(DEFAULT_VJR_SEARCH_URL);
-    ParseUtils.printPersistentEntities(vjrParser.pEntities);
+    ParserUtils.printPersistentEntities(vjrParser.pEntities);
     //vjrParser.completeEntityInfo();
     //ParseUtils.writeJsonFile(vjrParser.entities, DEFAULT_JSON_OUTPUT + DEFAULT_JSON_FILE);
     //ParseUtils.generateSeedFile("");
@@ -106,7 +106,7 @@ public class VejaRioParser {
         Map.Entry<Utf8, Utf8> pairs = (Map.Entry<Utf8, Utf8>)it.next();
         
         // Reading individual URLs
-        doc = ParseUtils.connectGetUrl(ParseUtils.getUri(pairs.getValue().toString()).toASCIIString());
+        doc = ParserUtils.connectGetUrl(ParserUtils.getUri(pairs.getValue().toString()).toASCIIString());
 
         // Parsing individual sites
         if (doc != null){
@@ -121,7 +121,7 @@ public class VejaRioParser {
               Element infoBlock = infoBlocks.get(iCnt);
               switch(iCnt){
                 case 0:
-                  EylloLink homePage = ParseUtils.detectUrl(infoBlock.select("p[id=g_site]").select("a").first());
+                  EylloLink homePage = ParserUtils.detectUrl(infoBlock.select("p[id=g_site]").select("a").first());
                   if (homePage != null)
                     pEntity.setHomepage(new Utf8(homePage.getLinkHref()));
                     ///pEntity.setProperties(EntityUtils.HOME_PAGE, homePage.getLinkHref());
@@ -165,15 +165,15 @@ public class VejaRioParser {
           else if (extraInfos.get(iCntInf).text().toLowerCase().contains("bairro")){
             // adding address
             ///entLoc.setAddress(entLoc.getAddress() + VejaRioParser.INFO_SEP + extraInfos.get(iCntInf).ownText());
-              entLoc.setAddress(new Utf8(entLoc.getAddress().toString() + ConstantsParser.INFO_SEP + extraInfos.get(iCntInf).ownText()));
+              entLoc.setAddress(new Utf8(entLoc.getAddress().toString() + ParserConstants.INFO_SEP + extraInfos.get(iCntInf).ownText()));
             // adding city
             ///entLoc.setAddress(entLoc.getAddress() + VejaRioParser.INFO_SEP + VejaRioParser.DEFAULT_CITY);
-              entLoc.setAddress(new Utf8(entLoc.getAddress().toString() + ConstantsParser.INFO_SEP + VejaRioParser.DEFAULT_CITY));
+              entLoc.setAddress(new Utf8(entLoc.getAddress().toString() + ParserConstants.INFO_SEP + VejaRioParser.DEFAULT_CITY));
           }
           else if (extraInfos.get(iCntInf).text().toLowerCase().contains("cep")){
             //System.out.println("CEP");
             ///entLoc.setAddress(entLoc.getAddress() + VejaRioParser.INFO_SEP + extraInfos.get(iCntInf).text());
-              entLoc.setAddress(new Utf8(entLoc.getAddress().toString() + ConstantsParser.INFO_SEP + extraInfos.get(iCntInf).text()));
+              entLoc.setAddress(new Utf8(entLoc.getAddress().toString() + ParserConstants.INFO_SEP + extraInfos.get(iCntInf).text()));
           }
           else if (extraInfos.get(iCntInf).text().toLowerCase().contains("telefone"))
             ///pEntity.setProperties(EntityUtils.PHONES, extraInfos.get(iCntInf).ownText());
@@ -210,7 +210,7 @@ public class VejaRioParser {
    */
   public void parseSearchResults(String pUrl){
     LOGGER.info("Starting to parse data from " + pUrl);
-    Document doc = ParseUtils.connectGetUrl(pUrl);
+    Document doc = ParserUtils.connectGetUrl(pUrl);
 
     Element div = doc.select("div[id=bsc_resultado]").first();
     Elements resBlocks = div.children();
@@ -226,7 +226,7 @@ public class VejaRioParser {
     ///tmpEntity.setProperties(EntityUtils.SUBJECT, resBlock.select("h3").text());
       // getting name and sameAs link
       
-      EylloLink sasLink = ParseUtils.detectUrl(resBlock.select("h2").first().children().first());
+      EylloLink sasLink = ParserUtils.detectUrl(resBlock.select("h2").first().children().first());
       if (sasLink != null){
         ///tmpEntity.setProperties(EntityUtils.NAME, sasLink.getLinkText());
         tmpPerEntity.setName(new Utf8(sasLink.getLinkText()));

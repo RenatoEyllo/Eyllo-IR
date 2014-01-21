@@ -117,7 +117,7 @@ public class StoresParser {
                     infoBox = new HashMap();
                     results.put("scenarioId", scenarioId);
                     //scenarioId++;
-                    this.jsonObjects.add(ParseUtils.getJsonObj(results));
+                    this.jsonObjects.add(ParserUtils.getJsonObj(results));
                     results = new HashMap();
                   }
                   // Handling the address
@@ -217,7 +217,7 @@ public class StoresParser {
                */
               
               
-              this.jsonObjects.add(ParseUtils.getJsonObj(results));
+              this.jsonObjects.add(ParserUtils.getJsonObj(results));
               results = new HashMap();
               /**
                * location = new HashMap();

@@ -55,26 +55,26 @@ public class ApontadorParser {
 
   /** Default search URL for retrieving restaurants. */
   private final static String DEFAULT_APO_RESTS_SEARCH_URL =
-      "/em/rj/restaurantes?page=" + ConstantsParser.PARAM_NUM;
+      "/em/rj/restaurantes?page=" + ParserConstants.PARAM_NUM;
 
   /** Default search URL for retrieving hotels. */
   private final static String DEFAULT_APO_HOTELS_SEARCH_URL =
-      "/em/rj_rio-de-janeiro/hoteis-e-pousadas?page=" + ConstantsParser.PARAM_NUM;
+      "/em/rj_rio-de-janeiro/hoteis-e-pousadas?page=" + ParserConstants.PARAM_NUM;
 
   /** Default main URL where entities will be gotten. */
   private final static String DEFAULT_APO_URL = "http://www.apontador.com.br";
 
   /** Default output file name */
   private static String DEFAULT_APO_OUTPUT_FILE_NAME =
-      "apontador-" + ConstantsParser.PARAM_ENT_NAME + ".json";
+      "apontador-" + ParserConstants.PARAM_ENT_NAME + ".json";
 
   /**
    * Default constructor
    */
   public ApontadorParser(){
     setEntityType("");
-    setScenarioId(ConstantsParser.DEFAULT_SCENARIOID);
-    this.setMaxPageNumber(ConstantsParser.DEFAULT_SEARCH_PAGES);
+    setScenarioId(ParserConstants.DEFAULT_SCENARIOID);
+    this.setMaxPageNumber(ParserConstants.DEFAULT_SEARCH_PAGES);
     this.pEntities = new ArrayList<PersistentEntity>();
   }
 
@@ -84,8 +84,8 @@ public class ApontadorParser {
    */
   public ApontadorParser(String pEntityType){
     setEntityType(pEntityType);
-    setScenarioId(ConstantsParser.DEFAULT_SCENARIOID);
-    this.setMaxPageNumber(ConstantsParser.DEFAULT_SEARCH_PAGES);
+    setScenarioId(ParserConstants.DEFAULT_SCENARIOID);
+    this.setMaxPageNumber(ParserConstants.DEFAULT_SEARCH_PAGES);
     this.pEntities = new ArrayList<PersistentEntity>();
   }
 
@@ -96,7 +96,7 @@ public class ApontadorParser {
    */
   public ApontadorParser(String pEntityType, int pNumSearchPages){
     setEntityType(pEntityType);
-    setScenarioId(ConstantsParser.DEFAULT_SCENARIOID);
+    setScenarioId(ParserConstants.DEFAULT_SCENARIOID);
     this.setMaxPageNumber(pNumSearchPages);
     this.pEntities = new ArrayList<PersistentEntity>();
   }
@@ -127,10 +127,10 @@ public class ApontadorParser {
    * @return
    */
   private String getEntitySearchUrl(){
-    if (getEntityType().equals(ConstantsParser.ENTITY_RESTAURANTS)) {
+    if (getEntityType().equals(ParserConstants.ENTITY_RESTAURANTS)) {
       return DEFAULT_APO_RESTS_SEARCH_URL;
     }
-    else if (getEntityType().equals(ConstantsParser.ENTITY_HOTELS)) {
+    else if (getEntityType().equals(ParserConstants.ENTITY_HOTELS)) {
       return DEFAULT_APO_HOTELS_SEARCH_URL;
     }
     else {
@@ -148,8 +148,8 @@ public class ApontadorParser {
       int iCnt = 0;
       String url = DEFAULT_APO_URL.concat(getEntitySearchUrl());
       while ( iCnt < this.getMaxPageNumber()){
-        LOGGER.debug("Getting: "+ url.replace(ConstantsParser.PARAM_NUM, String.valueOf(iCnt)));
-        this.parseSearchResults(url.replace(ConstantsParser.PARAM_NUM, String.valueOf(iCnt)));
+        LOGGER.debug("Getting: "+ url.replace(ParserConstants.PARAM_NUM, String.valueOf(iCnt)));
+        this.parseSearchResults(url.replace(ParserConstants.PARAM_NUM, String.valueOf(iCnt)));
         iCnt+=1;
         //break;
       }
@@ -183,8 +183,8 @@ public class ApontadorParser {
       Map.Entry<Utf8, Utf8> pairs = (Map.Entry<Utf8, Utf8>)it.next();
       
       // Reading individual URLs
-      LOGGER.debug("Parsing entity from: " + ParseUtils.getUri(pairs.getKey().toString()).toASCIIString());
-      doc = ParseUtils.connectGetUrl(ParseUtils.getUri(pairs.getKey().toString()).toASCIIString());
+      LOGGER.debug("Parsing entity from: " + ParserUtils.getUri(pairs.getKey().toString()).toASCIIString());
+      doc = ParserUtils.connectGetUrl(ParserUtils.getUri(pairs.getKey().toString()).toASCIIString());
       if (doc == null)
         break;
       
@@ -219,7 +219,7 @@ public class ApontadorParser {
     //File input = new File(pUrl);
     Document doc = null;
     
-    doc = ParseUtils.connectGetUrl(ParseUtils.getUri(pUrl).toASCIIString());
+    doc = ParserUtils.connectGetUrl(ParserUtils.getUri(pUrl).toASCIIString());
     doc.setBaseUri(DEFAULT_APO_URL);
     Elements results = doc.select("div[class*=result hreview-aggregate]");
     for (Element result : results){
@@ -228,7 +228,7 @@ public class ApontadorParser {
       // getting classification
       pEnt.setLabel(new Utf8(result.children().select("div[class*=info]").select("p[class*=category]").first().ownText()));
       // getting name and URL
-      EylloLink link = ParseUtils.detectUrl(result.children().select("div[class*=info]").select("a").first());
+      EylloLink link = ParserUtils.detectUrl(result.children().select("div[class*=info]").select("a").first());
       if ( link != null){
         LOGGER.debug(ApontadorParser.DEFAULT_APO_URL + link.getLinkHref());
         LOGGER.debug(link.getLinkText());
@@ -258,7 +258,7 @@ public class ApontadorParser {
    */
   public static void main(String[] args) {
     ApontadorParser apontParser = new ApontadorParser();
-    ParseUtils.writeJsonFile(apontParser.getEntities(), "/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/res/apontador.json");
+    ParserUtils.writeJsonFile(apontParser.getEntities(), "/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/res/apontador.json");
     //apontParser.getEntities();
   }
 
@@ -268,7 +268,7 @@ public class ApontadorParser {
    */
   public static String getOutputFileName(){
     return DEFAULT_APO_OUTPUT_FILE_NAME.replace(
-        ConstantsParser.PARAM_ENT_NAME, getEntityType());
+        ParserConstants.PARAM_ENT_NAME, getEntityType());
   }
 
   /**

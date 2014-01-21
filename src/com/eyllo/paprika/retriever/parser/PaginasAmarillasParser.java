@@ -87,7 +87,7 @@ public class PaginasAmarillasParser {
     LOGGER.info("Verifying: " + pUrl);
     boolean flgValidated = true;
     Document doc = null;
-    doc = ParseUtils.connectGetUrl(ParseUtils.getUri(pUrl).toASCIIString());
+    doc = ParserUtils.connectGetUrl(ParserUtils.getUri(pUrl).toASCIIString());
     if (doc.html().indexOf("Error!") > 0 ||
         doc.html().indexOf("Problemas al realizar su solicitud. Intente nuevamente por favor.") > 0)
       flgValidated = false;
@@ -113,8 +113,8 @@ public class PaginasAmarillasParser {
       Map.Entry<Utf8, Utf8> pairs = (Map.Entry<Utf8, Utf8>)it.next();
       
       // Reading individual URLs
-      doc = ParseUtils.connectGetUrl(ParseUtils.getUri(pairs.getKey().toString()).toASCIIString());
-      LOGGER.debug("Parsing entity from: " + ParseUtils.getUri(pairs.getKey().toString()).toASCIIString());
+      doc = ParserUtils.connectGetUrl(ParserUtils.getUri(pairs.getKey().toString()).toASCIIString());
+      LOGGER.debug("Parsing entity from: " + ParserUtils.getUri(pairs.getKey().toString()).toASCIIString());
       doc.setBaseUri(DEFAULT_PA_URL);
       Elements extraInfos = doc.select("div.acerca");
       
@@ -127,16 +127,16 @@ public class PaginasAmarillasParser {
           for (Element datum : datums){
             String datumText = datum.text().toLowerCase();
             if (datumText.contains("actividad:"))
-              pEntity.setIndustry(new Utf8(ParseUtils.toCamelCase(datumText.replace("actividad:", ""))));
+              pEntity.setIndustry(new Utf8(ParserUtils.toCamelCase(datumText.replace("actividad:", ""))));
             else if (datumText.contains("formas de pago:"))
-              pEntity.addToExtraInfo(new Utf8(ParseUtils.toCamelCase(datumText)));
+              pEntity.addToExtraInfo(new Utf8(ParserUtils.toCamelCase(datumText)));
             else if (datumText.contains("tipo de alojamiento:"))
-              pEntity.setLabel(new Utf8(ParseUtils.toCamelCase(datumText.replace("tipo de alojamiento:", ""))));
+              pEntity.setLabel(new Utf8(ParserUtils.toCamelCase(datumText.replace("tipo de alojamiento:", ""))));
             else if (datumText.contains("sucursal")){
               String locStrings[] = datumText.substring(datumText.indexOf(":") + 1, datumText.length()).split("tlf.");
               if (locStrings.length == 2){
-                pEntity.getPersistentpoint().setAddress(new Utf8(ParseUtils.toCamelCase(locStrings[0])));
-                pEntity.addToTelephones(new Utf8(ParseUtils.toCamelCase(locStrings[1])));
+                pEntity.getPersistentpoint().setAddress(new Utf8(ParserUtils.toCamelCase(locStrings[0])));
+                pEntity.addToTelephones(new Utf8(ParserUtils.toCamelCase(locStrings[1])));
               }
             }
             else if (datumText.contains("sitio web:")){
@@ -145,13 +145,13 @@ public class PaginasAmarillasParser {
               pEntity.putToSameAs(hPage, hPage);
             }
             else if (datumText.contains("areas comunes:"))
-              pEntity.addToExtraInfo(new Utf8(ParseUtils.toCamelCase(datumText)));
+              pEntity.addToExtraInfo(new Utf8(ParserUtils.toCamelCase(datumText)));
             else if (datumText.contains("formas de pago:"))
-              pEntity.addToExtraInfo(new Utf8(ParseUtils.toCamelCase(datumText)));
+              pEntity.addToExtraInfo(new Utf8(ParserUtils.toCamelCase(datumText)));
             else if (datumText.contains("servicios generales:")){
               String serStrings[] = datumText.split(",");
               for (String serString : serStrings)
-                pEntity.addToServices(new Utf8(ParseUtils.toCamelCase(serString)));
+                pEntity.addToServices(new Utf8(ParserUtils.toCamelCase(serString)));
             }
           }
         }
@@ -183,7 +183,7 @@ public class PaginasAmarillasParser {
     Document doc = null;
     
     //doc = Jsoup.parse(input, ParseUtils.UTF8_ENCODING, pUrl);
-    doc = ParseUtils.connectGetUrl(ParseUtils.getUri(pUrl).toASCIIString());
+    doc = ParserUtils.connectGetUrl(ParserUtils.getUri(pUrl).toASCIIString());
     doc.setBaseUri(DEFAULT_PA_URL);
     
     Elements results = doc.select("div[class*=resultados]").select("div[class*=posicion]");
@@ -194,7 +194,7 @@ public class PaginasAmarillasParser {
       Element entText = res.select("div[class*=texto-bus]").first();
       
       // setting name and alternative url
-      EylloLink eylloLink = ParseUtils.detectUrl(entText.select("h2").select("a").first());
+      EylloLink eylloLink = ParserUtils.detectUrl(entText.select("h2").select("a").first());
       if (eylloLink != null){
         pEnt.setName(new Utf8(eylloLink.getLinkText()));
         pEnt.putToSameAs(new Utf8(DEFAULT_PA_URL + eylloLink.getLinkHref()),
@@ -253,7 +253,7 @@ public class PaginasAmarillasParser {
     PaginasAmarillasParser pa = new PaginasAmarillasParser();
     //pa.parseSearchResults(DEFAULT_PA_SEARCH_URL);
     //pa.getEntities();
-    ParseUtils.writeJsonFile(pa.getEntities(), "/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/res/paginasAmarillas.json");
+    ParserUtils.writeJsonFile(pa.getEntities(), "/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/res/paginasAmarillas.json");
   }
 
 }

@@ -1,5 +1,7 @@
 package com.eyllo.paprika.retriever.parser;
 
+import static com.eyllo.paprika.retriever.parser.ParserConstants.ENCODING_UTF8;
+
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -14,6 +16,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.jsoup.Connection;
+import org.jsoup.Connection.Method;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -23,19 +29,13 @@ import org.slf4j.LoggerFactory;
 import com.eyllo.paprika.retriever.parser.elements.EylloLink;
 import com.eyllo.paprika.retriever.parser.elements.PersistentEntity;
 
-public class ParseUtils {
+public class ParserUtils {
 
   /**
    * Logger to help us write write info/debug/error messages
    */
-  private static Logger LOGGER = LoggerFactory.getLogger(ParseUtils.class);
+  private static Logger LOGGER = LoggerFactory.getLogger(ParserUtils.class);
 
-  /**
-   * Default encoding for reading portuguese pages
-   */
-  public static String ISO_ENCODING = "ISO-8859-1";
-  public static String UTF8_ENCODING = "UTF-8";
-  
   /**
    * Detects if an element is a link and returns the object if it is
    * @param pElement
@@ -85,12 +85,72 @@ public class ParseUtils {
   public static Document connectGetUrl(String pUrl){
     Document doc = null;
     try {
-      doc = Jsoup.connect(pUrl).timeout(ConstantsParser.MAX_CONN_TIME).get();
+      doc = Jsoup.connect(pUrl).timeout(ParserConstants.MAX_CONN_TIME).get();
     } catch (IOException e) {
       LOGGER.error("Error while connecting to " + pUrl);
       e.printStackTrace();
     }
     return doc;
+  }
+
+  /**
+   * Connects to an url using specific parameters using the POST method.
+   * @param pUrl    Url to connect to.
+   * @param params  Parameters to be used.
+   * @return        Document obtained.
+   */
+  public static Document connectPostUrl(String pUrl, Map<String, String> params) {
+    Document doc = null;
+    try {
+      doc = Jsoup.connect(pUrl).ignoreContentType(true).timeout(ParserConstants.MAX_CONN_TIME).data(params).post();
+    } catch (IOException e) {
+      LOGGER.error("Error while connecting to " + pUrl);
+      e.printStackTrace();
+    }
+    return doc;
+  }
+
+  /**
+   * Connects to an URL using a post request and also a cookie
+   * @param pUrl    authentication url
+   * @param pUrl2   second url request
+   * @param cookieName  cookie name to be used
+   * @return Document retrieved from the second url
+   */
+  public static Document connectCookiePostUrl(String pUrl, Map<String, String> cookies) {
+    Document doc2 = null;
+    try {
+      Connection con = Jsoup.connect(pUrl)
+          .ignoreContentType(true)
+          .timeout(ParserConstants.MAX_CONN_TIME);
+      for (String cookieName : cookies.keySet()) {
+        con.cookie(cookieName, cookies.get(cookieName));
+      }
+      doc2 = con.get();
+      //Jsoup.parse(new String(
+      //    con.execute().bodyAsBytes(),"ISO-8859-15"));
+    } catch (IOException e) {
+      LOGGER.error("Error while connecting to " + pUrl);
+      e.printStackTrace();
+    }
+    return doc2;
+  }
+
+  public static String getCookie(String pUrl, String cookieName) {
+    Connection.Response res;
+    String cookieVal = "";
+    try {
+      res = Jsoup.connect(pUrl)
+          .ignoreContentType(true)
+          .timeout(ParserConstants.MAX_CONN_TIME)
+          .method(Method.POST)
+          .execute();
+      cookieVal = res.cookie(cookieName);
+    } catch (IOException e) {
+      LOGGER.error("Error while getting cookie from " + pUrl);
+      e.printStackTrace();
+    }
+    return cookieVal;
   }
 
   /**
@@ -101,7 +161,7 @@ public class ParseUtils {
   public static void writeJsonFile(List<PersistentEntity> pEntities, String pFilePath){
     Writer fileWriter = null;
     try {
-      fileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(pFilePath), Charset.forName(UTF8_ENCODING)));
+      fileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(pFilePath), Charset.forName(ENCODING_UTF8)));
       for (PersistentEntity ent : pEntities){
         if ( ent != null && ent.getPersistentpoint() != null && 
              ent.getPersistentpoint().getAddress() != null &&
@@ -117,16 +177,32 @@ public class ParseUtils {
 
   /**
    * Method to build a JSONObject from a HashMap
-   * @param tmp
-   * @return
+   * @param pAttrMap containing all attributes for a JSON object.
+   * @return JSONObject constructed.
    */
   @SuppressWarnings({ "unchecked", "rawtypes"})
-  public static JSONObject getJsonObj(Map tmp){
+  public static JSONObject getJsonObj(Map pAttrMap){
     JSONObject jsonObj = new JSONObject();
-    jsonObj.putAll(tmp);
+    jsonObj.putAll(pAttrMap);
     return jsonObj;
   }
-  
+
+  /**
+   * Method to build a JSONObject from a string
+   * @param pJsonRep a string for the JSONObject.
+   * @return Object constructed can be a JSONObject or a JSONArray.
+   */
+  public static Object getJsonObj(String pJsonRep){
+    Object jsonObj = null;
+    try {
+      jsonObj = new JSONParser().parse(pJsonRep);
+    } catch (ParseException e) {
+      LOGGER.error("Error while creating JSON object from " + pJsonRep);
+      e.printStackTrace();
+    }
+    return jsonObj;
+  }
+
   public static void generateSeedFile(String pSeedFilePath){
     // 1. Read all sameAs attributes
     // 2. Write all sameAs links into an external file

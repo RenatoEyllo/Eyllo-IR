@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.bingmaps.rest.models.Confidence;
 
-import com.eyllo.paprika.retriever.parser.ParseUtils;
+import com.eyllo.paprika.retriever.parser.ParserUtils;
 
 /**
  * Class in charge of handling all the location information
@@ -75,7 +75,7 @@ public class EylloLocation {
     location.put(ACC_JSON_ELEM, this.getAccuracy());
     Map tmp = new HashMap();
     tmp.put(MAIN_JSON_ELEM, location);
-    return ParseUtils.getJsonObj(tmp).toJSONString();
+    return ParserUtils.getJsonObj(tmp).toJSONString();
   }
 
   /**

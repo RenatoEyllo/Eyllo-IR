@@ -35,20 +35,21 @@ public class RioShowParser extends AbstractParser {
     this.setName("rioshow");
     this.setScenarioId(11);
     this.setUserId(20);
+    this.setUrl(DEFAULT_SEARCH_URL);
     setLogger(getClass());
   }
 
   @Override
-  public List<PersistentEntity> getEntities(String url) {
-    Document doc = ParseUtils.connectGetUrl(ParseUtils.getUri(url).toASCIIString());
-    doc.setBaseUri(url);
+  public List<PersistentEntity> fetchEntities() {
+    Document doc = ParserUtils.connectGetUrl(ParserUtils.getUri(this.getUrl()).toASCIIString());
+    doc.setBaseUri(this.getUrl());
   //  int cont = 0;
     // get initial list
     Elements elemsPosted = doc.select("div[class*=content]")
         .select("div[class*=lista_item]");
     if (elemsPosted != null) {
       for (Element elemPosted : elemsPosted) {
-        EylloLink link = ParseUtils.detectUrl(elemPosted.children().get(1));
+        EylloLink link = ParserUtils.detectUrl(elemPosted.children().get(1));
         if (link != null) {
           // Parse each result site
           this.parseSearchResults(link.getLinkHref());
@@ -77,7 +78,7 @@ public class RioShowParser extends AbstractParser {
     getLogger().info("Started parsing: " + url);
     Document doc = null;
     
-    doc = ParseUtils.connectGetUrl(ParseUtils.getUri(url).toASCIIString());
+    doc = ParserUtils.connectGetUrl(ParserUtils.getUri(url).toASCIIString());
     doc.setBaseUri(url);
     if (validateRioShow(doc)) {
       Elements descElems = doc.select("div[id*=DescricaoEvento_divExibeSinopse]");
@@ -86,7 +87,7 @@ public class RioShowParser extends AbstractParser {
           Elements infoLinks = descElems.select("p").first().select("a");
           if (infoLinks != null)
             for (Element elem : infoLinks) {
-              EylloLink eyLink = ParseUtils.detectUrl(elem);
+              EylloLink eyLink = ParserUtils.detectUrl(elem);
               if (eyLink != null) {
                 PersistentEntity pEnt = new PersistentEntity();
                 pEnt.setName(new Utf8(eyLink.getLinkText()));
@@ -116,7 +117,7 @@ public class RioShowParser extends AbstractParser {
     RioShowParser rioSh = new RioShowParser();
     //rioSh.getEntities(DEFAULT_SEARCH_URL);
     rioSh.setPath("/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/res/");
-    ParseUtils.writeJsonFile(rioSh.getEntities(DEFAULT_SEARCH_URL), rioSh.getOutputFileName());
+    ParserUtils.writeJsonFile(rioSh.fetchEntities(), rioSh.getOutputFileName());
   }
 
   @Override
@@ -127,8 +128,8 @@ public class RioShowParser extends AbstractParser {
     while (it.hasNext()) {
       Map.Entry<Utf8, Utf8> pairs = (Map.Entry<Utf8, Utf8>)it.next();
       // Reading individual URLs
-      getLogger().debug("Parsing entity from: " + ParseUtils.getUri(pairs.getKey().toString()).toASCIIString());
-      doc = ParseUtils.connectGetUrl(ParseUtils.getUri(pairs.getKey().toString()).toASCIIString());
+      getLogger().debug("Parsing entity from: " + ParserUtils.getUri(pairs.getKey().toString()).toASCIIString());
+      doc = ParserUtils.connectGetUrl(ParserUtils.getUri(pairs.getKey().toString()).toASCIIString());
       if (doc == null || !validateRioShow(doc))
         break;
       // getting geospatial information
@@ -153,7 +154,7 @@ public class RioShowParser extends AbstractParser {
     Element homePage = doc.select("ul[id*=atribVirtualHeader]").first();
     if (homePage != null) {
       if (homePage.children().size() >= 1) {
-        EylloLink eyLink = ParseUtils.detectUrl(homePage.children().get(0).select("a").first());
+        EylloLink eyLink = ParserUtils.detectUrl(homePage.children().get(0).select("a").first());
         if (eyLink != null) {
           pEntity.setHomepage(new Utf8(eyLink.getLinkHref()));
           pEntity.putToSameAs(new Utf8(eyLink.getLinkHref()), new Utf8(eyLink.getLinkText()));

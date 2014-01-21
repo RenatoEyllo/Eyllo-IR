@@ -96,8 +96,8 @@ public class RioGuiaParser {
       Map.Entry<Utf8, Utf8> pairs = (Map.Entry<Utf8, Utf8>)it.next();
       
       // Reading individual URLs
-      LOGGER.debug("Parsing entity from: " + ParseUtils.getUri(pairs.getKey().toString()).toASCIIString());
-      doc = ParseUtils.connectGetUrl(ParseUtils.getUri(pairs.getKey().toString()).toASCIIString());
+      LOGGER.debug("Parsing entity from: " + ParserUtils.getUri(pairs.getKey().toString()).toASCIIString());
+      doc = ParserUtils.connectGetUrl(ParserUtils.getUri(pairs.getKey().toString()).toASCIIString());
       if (doc == null)
         break;
       
@@ -159,18 +159,19 @@ public class RioGuiaParser {
     //File input = new File(pUrl);
     Document doc = null;
     
-    doc = ParseUtils.connectGetUrl(ParseUtils.getUri(pUrl).toASCIIString());
+    doc = ParserUtils.connectGetUrl(ParserUtils.getUri(pUrl).toASCIIString());
     doc.setBaseUri(DEFAULT_RG_URL);
     Elements results = doc.select("div[class*=itensResultados]");
     for (Element result : results){
       PersistentEntity pEnt = new PersistentEntity();
       pEnt.addToScenarioId(RioGuiaParser.DEFAULT_SCENARIOID);
-      EylloLink link = ParseUtils.detectUrl(result.children().select("p[class*=itenTitulo]").select("a").first());
+      EylloLink link = ParserUtils.detectUrl(result.children().select("p[class*=itenTitulo]").select("a").first());
       if ( link != null){
         pEnt.setName(new Utf8(link.getLinkText()));
         pEnt.putToSameAs(new Utf8(RioGuiaParser.DEFAULT_RG_URL + link.getLinkHref()), new Utf8(link.getLinkText()));
       }
       pEnt.setDescription(new Utf8(result.children().select("p[class*=itenTexto]").first().ownText()));
+      //TODO the verification about how many entities should be retrieved should come from here
       this.pEntities.add(pEnt);
     }
   }
@@ -188,7 +189,7 @@ public class RioGuiaParser {
    */
   public static void main(String[] args) {
     RioGuiaParser rioG = new RioGuiaParser();
-    ParseUtils.writeJsonFile(rioG.getEntities(), "/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/res/rioGuia.json");
+    ParserUtils.writeJsonFile(rioG.getEntities(), "/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/res/rioGuia.json");
   }
 
 }

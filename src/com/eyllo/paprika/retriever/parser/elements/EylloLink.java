@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.jsoup.nodes.Element;
 
-import com.eyllo.paprika.retriever.parser.ParseUtils;
+import com.eyllo.paprika.retriever.parser.ParserUtils;
 
 /**
  * Class encapsulating the link element
@@ -56,7 +56,7 @@ public class EylloLink {
     link.put(HREF_JSON_ELEM, this.getLinkHref());
     Map tmp = new HashMap();
     tmp.put(MAIN_JSON_ELEM, link);
-    return ParseUtils.getJsonObj(tmp).toJSONString();
+    return ParserUtils.getJsonObj(tmp).toJSONString();
   }
 
   /**

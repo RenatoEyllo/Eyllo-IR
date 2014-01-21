@@ -107,7 +107,7 @@ public class TeleListasParser {
       for (Element child : pInfoElement.children()){
         if (!child.toString().equals("")){
           if (pEntity.getProperties(EntityUtils.HOME_PAGE) == null){
-            EylloLink mainSite = ParseUtils.detectUrl(child);
+            EylloLink mainSite = ParserUtils.detectUrl(child);
             if (mainSite.getLinkText().equals("site"))
               pEntity.setProperties(EntityUtils.HOME_PAGE, getHomePageLink(mainSite.getLinkHref()));
           }
@@ -137,7 +137,7 @@ public class TeleListasParser {
       for (Element child : pInfoElement.children()){
         //System.out.println("+"+child.getAllElements().toString());
         // Detect URL to create main URL which contains the main name of the entity
-        EylloLink tmpLink = ParseUtils.detectUrl(child);
+        EylloLink tmpLink = ParserUtils.detectUrl(child);
         if (tmpLink != null){
           pEntity.setProperties(EntityUtils.NAME, tmpLink.getLinkText());
           pEntity.addLink(tmpLink);

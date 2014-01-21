@@ -43,8 +43,8 @@ import org.apache.gora.persistency.StatefulHashMap;
 import org.apache.gora.persistency.ListGenericArray;
 
 import com.eyllo.paprika.entity.EntityUtils;
-import com.eyllo.paprika.retriever.parser.ConstantsParser;
-import com.eyllo.paprika.retriever.parser.ParseUtils;
+import com.eyllo.paprika.retriever.parser.ParserConstants;
+import com.eyllo.paprika.retriever.parser.ParserUtils;
 import com.eyllo.paprika.retriever.parser.elements.PersistentPoint;
 
 @SuppressWarnings("all")
@@ -434,7 +434,7 @@ public class PersistentEntity extends PersistentBase {
       jsonMap.put("title", this.getName()!=null?this.getName().toString():"");
       // extra info
       for (Utf8 eInfo : this.getExtraInfo())
-        strBuilder.append(eInfo.toString()).append(ConstantsParser.INFO_SEP);
+        strBuilder.append(eInfo.toString()).append(ParserConstants.INFO_SEP);
       jsonMap.put("text", strBuilder.toString());
       //location
       Map infoBox = new HashMap();
@@ -458,17 +458,17 @@ public class PersistentEntity extends PersistentBase {
       if (strBuilder.length() > 1)
         strBuilder.delete(0, strBuilder.length()-1);
       for (Utf8 phone : this.getTelephones())
-        strBuilder.append(phone.toString()).append(ConstantsParser.INFO_SEP);
+        strBuilder.append(phone.toString()).append(ParserConstants.INFO_SEP);
       /// services
       if (strBuilder.length() > 1)
         strBuilder.delete(0, strBuilder.length()-1);
       for (Utf8 service : this.getServices())
-        strBuilder.append(service.toString()).append(ConstantsParser.INFO_SEP);
+        strBuilder.append(service.toString()).append(ParserConstants.INFO_SEP);
       infoBox.put(EntityUtils.SCHEDULE, this.getSchedule()!=null?this.getSchedule().toString():"");
       //infoBox.put("extraInfo", strBuilder.toString());
       jsonMap.put("infobox", infoBox);
       jsonMap.put("loc", geoJson);
-      return ParseUtils.getJsonObj(jsonMap).toJSONString();
+      return ParserUtils.getJsonObj(jsonMap).toJSONString();
     }catch(Exception e){
       e.printStackTrace();
       return "";

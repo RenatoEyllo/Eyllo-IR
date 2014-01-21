@@ -67,8 +67,8 @@ public class VejaSaoPauloParser {
    * Default constructor
    */
   public VejaSaoPauloParser() {
-    this.setMaxPageNumber(ConstantsParser.DEFAULT_SEARCH_PAGES);
-    setScenarioId(ConstantsParser.DEFAULT_SCENARIOID);
+    this.setMaxPageNumber(ParserConstants.DEFAULT_SEARCH_PAGES);
+    setScenarioId(ParserConstants.DEFAULT_SCENARIOID);
     this.pEntities = new ArrayList<PersistentEntity>();
   }
 
@@ -78,7 +78,7 @@ public class VejaSaoPauloParser {
    */
   public VejaSaoPauloParser(int pNumSearchPages) {
     this.setMaxPageNumber(pNumSearchPages);
-    setScenarioId(ConstantsParser.DEFAULT_SCENARIOID);
+    setScenarioId(ParserConstants.DEFAULT_SCENARIOID);
     this.pEntities = new ArrayList<PersistentEntity>();
   }
 
@@ -98,7 +98,7 @@ public class VejaSaoPauloParser {
    */
   public static void main(String[] args) {
     VejaSaoPauloParser vjSap = new VejaSaoPauloParser();
-    ParseUtils.writeJsonFile(vjSap.getEntities(), "/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/res/vjSaoPaulo-10000.json");
+    ParserUtils.writeJsonFile(vjSap.getEntities(), "/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/res/vjSaoPaulo-10000.json");
   }
 
   /**
@@ -110,8 +110,8 @@ public class VejaSaoPauloParser {
       String url = DEFAULT_VSP_URL.concat(DEFAULT_VSP_FOOD_SEARCH_URL);
       while ( iCnt < this.getMaxPageNumber()){
         iCnt+=1;
-        LOGGER.info("Getting: "+ url.replace(ConstantsParser.PARAM_NUM, String.valueOf(iCnt)));
-        this.parseSearchResults(url.replace(ConstantsParser.PARAM_NUM, String.valueOf(iCnt)));
+        LOGGER.info("Getting: "+ url.replace(ParserConstants.PARAM_NUM, String.valueOf(iCnt)));
+        this.parseSearchResults(url.replace(ParserConstants.PARAM_NUM, String.valueOf(iCnt)));
         break;
       }
       LOGGER.info("Hubo # entidades : " + this.totalEntities());
@@ -149,8 +149,8 @@ public class VejaSaoPauloParser {
       Map.Entry<Utf8, Utf8> pairs = (Map.Entry<Utf8, Utf8>)it.next();
       
       // Reading individual URLs
-      LOGGER.info("Parsing entity from: " + ParseUtils.getUri(pairs.getKey().toString()).toASCIIString());
-      doc = ParseUtils.connectGetUrl(ParseUtils.getUri(pairs.getKey().toString()).toASCIIString());
+      LOGGER.info("Parsing entity from: " + ParserUtils.getUri(pairs.getKey().toString()).toASCIIString());
+      doc = ParserUtils.connectGetUrl(ParserUtils.getUri(pairs.getKey().toString()).toASCIIString());
       if (doc == null && !validateSite (doc)) {
         break;
       }
@@ -161,7 +161,7 @@ public class VejaSaoPauloParser {
         Elements workElems = doc.select("div[class*=information-unwanted]").select("div[class*=working-hours]");
         if (workElems !=  null && workElems.size() > 0){
           for(Element info : workElems.select("div[class*=hours]").select("p"))
-            strBuilder.append(info.text().replace("-", "_")).append(ConstantsParser.INFO_SEP);
+            strBuilder.append(info.text().replace("-", "_")).append(ParserConstants.INFO_SEP);
           pEntity.setSchedule(new Utf8(strBuilder.toString()));
         }
 
@@ -169,7 +169,7 @@ public class VejaSaoPauloParser {
         workElems = doc.select("div[class*=information-unwanted]").select("div[class*=price]").select("p[class*=price-range]");
         strBuilder.delete(0, strBuilder.length());
         if (workElems !=  null && workElems.size() > 0){
-          strBuilder.append(doc.select("div[class*=price]").select("h3").first().text() + ConstantsParser.DESC_SEP);
+          strBuilder.append(doc.select("div[class*=price]").select("h3").first().text() + ParserConstants.DESC_SEP);
           strBuilder.append(workElems.text());
           pEntity.addToExtraInfo(new Utf8(strBuilder.toString()));
           //LOGGER.debug(strBuilder.toString());
@@ -179,10 +179,10 @@ public class VejaSaoPauloParser {
         workElems = doc.select("div[class*=information-unwanted]").select("div[class*=payment]").select("p");
         strBuilder.delete(0, strBuilder.length());
         if (workElems != null && workElems.size() > 0){
-          strBuilder.append(doc.select("div[class*=payment]").select("h3").first().text() + ConstantsParser.DESC_SEP);
+          strBuilder.append(doc.select("div[class*=payment]").select("h3").first().text() + ParserConstants.DESC_SEP);
           for (Element infoElem : workElems)
             if (!infoElem.text().trim().equals("")){
-              strBuilder.append(infoElem.text().trim() + ConstantsParser.INFO_SEP);
+              strBuilder.append(infoElem.text().trim() + ParserConstants.INFO_SEP);
             }
         }//END-IF_PAYMENT
 
@@ -204,7 +204,7 @@ public class VejaSaoPauloParser {
         // getting home url
         workElems = doc.select("div[class*=information-unwanted]").select("div[class*=website]");
         if (workElems != null && workElems.size() > 0){
-          EylloLink homeLink = ParseUtils.detectUrl(workElems.select("div[class*=information-website]").select("p").select("a").first());
+          EylloLink homeLink = ParserUtils.detectUrl(workElems.select("div[class*=information-website]").select("p").select("a").first());
           if (homeLink != null){
             pEntity.setHomepage(new Utf8(homeLink.getLinkHref()));
             pEntity.putToSameAs(new Utf8(homeLink.getLinkHref()), new Utf8(homeLink.getLinkText()));
@@ -223,7 +223,7 @@ public class VejaSaoPauloParser {
     LOGGER.info("Started parsing: " + pUrl);
     Document doc = null;
     
-    doc = ParseUtils.connectGetUrl(ParseUtils.getUri(pUrl).toASCIIString());
+    doc = ParserUtils.connectGetUrl(ParserUtils.getUri(pUrl).toASCIIString());
     doc.setBaseUri(DEFAULT_VSP_URL);
     Elements results = doc.select("div[class*=map-list-item]");
     for (Element result : results){
@@ -235,7 +235,7 @@ public class VejaSaoPauloParser {
       ent.setIndustry(new Utf8(tmp.split("/")[0]));
       ent.setLabel(new Utf8(tmp));
       // getting same as value to where it is
-      EylloLink link = ParseUtils.detectUrl(infoElement.select("p[class*=establishment-name]").select("a").first());
+      EylloLink link = ParserUtils.detectUrl(infoElement.select("p[class*=establishment-name]").select("a").first());
       if (link != null){
         LOGGER.debug(DEFAULT_VSP_URL + link.getLinkHref());
         ent.putToSameAs(new Utf8(DEFAULT_VSP_URL + link.getLinkHref()),

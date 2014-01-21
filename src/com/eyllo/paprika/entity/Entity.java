@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.eyllo.paprika.retriever.parser.ParseUtils;
+import com.eyllo.paprika.retriever.parser.ParserUtils;
 import com.eyllo.paprika.retriever.parser.elements.EylloLink;
 import com.eyllo.paprika.retriever.parser.elements.EylloLocation;
 
@@ -77,7 +77,7 @@ public class Entity {
       geoJson.put("coordinates", coordinates);
       geoJson.put("accuracy", entLoc.getAccuracy());
       //jsonMap.put("location", entLoc.getAttribMap());
-      infoBox.put("text", entLoc.getAddress());
+      infoBox.put("text", entLoc.getAddress() + "\n" + this.properties.get(EntityUtils.SCHEDULE));
     }
     jsonMap.put("type", "text");
     //infobox
@@ -87,7 +87,7 @@ public class Entity {
     infoBox.put(EntityUtils.SCHEDULE, this.properties.get(EntityUtils.SCHEDULE));
     jsonMap.put("infobox", infoBox);
     jsonMap.put("loc", geoJson);
-    return ParseUtils.getJsonObj(jsonMap).toJSONString();
+    return ParserUtils.getJsonObj(jsonMap).toJSONString();
   }
   
   /**
