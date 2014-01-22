@@ -22,9 +22,10 @@ import com.eyllo.paprika.retriever.parser.elements.PersistentPoint;
  */
 public class SPTransParser extends AbstractParser {
 
-  public static String NAME = "spTrans";
+  /** SP Transport Parser. */
+  public static String NAME = "sptrans";
+  /** Site home page. */
   private static final String HOME_PAGE = "http://www.sptrans.com.br/";
-
   /** Default API URL. */
   private static final String OLHOVIVO_DEFAULT_API_URL = "http://api.olhovivo.sptrans.com.br/v0";
   /** API Token. */
@@ -37,6 +38,8 @@ public class SPTransParser extends AbstractParser {
   private static final String OLHOVIVO_API_SEARCH = "/Linha/Buscar?termosBusca=" + OLHOVIVO_SEARCH_TERM;
   /** API URL for getting stop signs of a bus line. */
   private static final String OLHOVIVO_API_STOPS_SEARCH = "/Parada/BuscarParadasPorLinha?codigoLinha=";
+  /** API URL for getting stops forecast depending on line numbers. */
+  private static final String OLHOVIVO_API_STOPS_FORECAST_SEARCH = "/Previsao/Linha?codigoLinha=";
   /** Cookie name for authentication. */
   private static final String OLHOVIVO_COOKIE_NAME = "apiCredentials";
 

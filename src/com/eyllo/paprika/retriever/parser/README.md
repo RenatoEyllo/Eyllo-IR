@@ -14,6 +14,7 @@ How parser works
 Implementing a new parser
 -------------------------
 * The new parser should extend AbstractParser.
+* The new parser should create an Static variable called NAME to specify its own name.
 * The process it should follow is:
   1. FetchEntities is the method that starts the whole process.
   2. Each fetched site should be parsed into an entity within the parseSearchResults.

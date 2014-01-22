@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.eyllo.paprika.entity.EntityUtils;
 import com.eyllo.paprika.geocoder.AbstractGeocoder;
 import com.eyllo.paprika.geocoder.GeocoderFactory;
+import com.eyllo.paprika.keeper.EntityKeeper;
 import com.eyllo.paprika.retriever.parser.AbstractParser;
 import com.eyllo.paprika.retriever.parser.ApontadorParser;
 import com.eyllo.paprika.retriever.parser.RioGuiaParser;
@@ -37,40 +38,48 @@ public class EntityRetriever {
 
   /** Geocoder object. */
   private static AbstractGeocoder geocoder;
+  /** Parser to be used. */
+  private AbstractParser parser;
+  /** Number of runs to be performed by EntityRetriever. */
+  private int numRuns;
+  /** Time interleaved between EntityRetriever runs. */
+  private int timeInterleaved;
+  /** Specifies how entities retrieved will be stored. */
+  private String backendEntities;
 
   /** Logger to help us write write info/debug/error messages. */
   private static Logger LOGGER = LoggerFactory.getLogger(EntityRetriever.class);
 
   /**
-   * @param args
+   * Starts Retriever with values set through properties file.
+   * @param pParserProperties
+   * @throws InterruptedException
    */
-  public static void main(String[] args) {
-    // 1. Retrieve entities
-    //AbstractParser absParser = null; //new SPTransParser(100, 100, true);
-    EntityRetriever entRet = new EntityRetriever();
-
-    entRet.initiateRetriever(RetrieverUtils.getPropertiesFile("/home/renato/workspace/Eyllo-IR/conf/retriever.properties"));
-
-    //entRet.entities = new ApontadorParser("hotels", 50, 20).getEntities();
-    //absParser.fetchEntities();
-    //absParser.completeEntityInfo();
-    //ParserUtils.writeJsonFile(absParser.getEntities(), absParser.getOutputFileName());
-      //entRet.entities = absParser.getEntities();
-
-      // 2. Store entities
-      // 3. Complete entities information
-      //entRet.entities = updateGeoInfo(entRet.entities);
-      //entRet.entities = verifyGeoInfo(entRet.entities);
-      //TODO update specific parsers to return their own file name
-      //ParserUtils.writeJsonFile(entRet.entities,
-      //    DEFAULT_JSON_OUTPUT + absParser.getOutputFileName());
+  public void startRetriever(Properties pParserProperties) throws InterruptedException {
+    setUpRetrieverProps(pParserProperties);
+    EntityKeeper entKeeper = new EntityKeeper(backendEntities);
+    while (numRuns > 0) {
+      entKeeper.saveEntities(parser.fetchEntities());
+      this.wait(numRuns);
+      System.out.println(parser.getParserName());
+    }
   }
 
-  public void initiateRetriever(Properties pParserProperties) {
-    AbstractParser absParser = getCorrectParser(pParserProperties);
-    System.out.println(absParser.getParserName());
+  /**
+   * Sets up Retriever properties.
+   * @param pRetrieverProps
+   */
+  public void setUpRetrieverProps(Properties pRetrieverProps) {
+    String tmpValue = pRetrieverProps.getProperty(RetrieverConstants.RET_BACKEND_ENTITIES);
+    backendEntities = (tmpValue == null|| tmpValue.isEmpty())?RetrieverConstants.DEFAULT_BACKENDENT:tmpValue;
+    tmpValue = pRetrieverProps.getProperty(RetrieverConstants.RET_BACKEND_ENTITIES);
+    numRuns = (tmpValue == null|| tmpValue.isEmpty())?RetrieverConstants.DEFAULT_NUM_RUNS:Integer.parseInt(tmpValue);
+    tmpValue = pRetrieverProps.getProperty(RetrieverConstants.RET_BACKEND_ENTITIES);
+    timeInterleaved = (tmpValue == null|| tmpValue.isEmpty())?RetrieverConstants.DEFAULT_TIME_INTERLEAVED:Integer.parseInt(tmpValue);
+    parser = getCorrectParser(pRetrieverProps);
+    if (parser == null)
+      getLogger().warn("Retriever could NOT create the specific parser.");
   }
-
   /**
    * Gets the correct parser using the properties file.
    * @param pParserProps  built from specific properties file.
@@ -80,29 +89,31 @@ public class EntityRetriever {
     AbstractParser parser = null;
     ArrayList<Object> initargs = new ArrayList<Object> ();
     //pMaxPageNumber
-    String tmpValue = pParserProps.getProperty(EntityRetrieverConstants.RPARSER_MAXPAGENUM);
-    initargs.add((tmpValue == null)?Integer.MAX_VALUE:Integer.parseInt(tmpValue));
+    String tmpValue = pParserProps.getProperty(RetrieverConstants.RPARSER_MAXPAGENUM);
+    initargs.add((tmpValue == null || tmpValue.isEmpty())?Integer.MAX_VALUE:Integer.parseInt(tmpValue));
     //pMaxNumEntities
-    tmpValue = pParserProps.getProperty(EntityRetrieverConstants.RPARSER_MAXNUMENT);
+    tmpValue = pParserProps.getProperty(RetrieverConstants.RPARSER_MAXNUMENT);
     initargs.add((tmpValue == null)?Integer.MAX_VALUE:Integer.parseInt(tmpValue));
     //pFetchUrl
-    tmpValue = pParserProps.getProperty(EntityRetrieverConstants.RPARSER_FETCHURL);
+    tmpValue = pParserProps.getProperty(RetrieverConstants.RPARSER_FETCHURL);
     initargs.add((tmpValue == null)?"":tmpValue);
     //pOutPath
-    tmpValue = pParserProps.getProperty(EntityRetrieverConstants.RPARSER_OUTPATH);
+    tmpValue = pParserProps.getProperty(RetrieverConstants.RPARSER_OUTPATH);
     initargs.add((tmpValue == null)?"":tmpValue);
     //pLocal
-    tmpValue = pParserProps.getProperty(EntityRetrieverConstants.RPARSER_LOCALSEARCH);
+    tmpValue = pParserProps.getProperty(RetrieverConstants.RPARSER_LOCALSEARCH);
     initargs.add((tmpValue == null)?false:Boolean.parseBoolean(tmpValue));
     //pPoliteness
-    tmpValue = pParserProps.getProperty(EntityRetrieverConstants.RPARSER_REQPOLITENESS);
+    tmpValue = pParserProps.getProperty(RetrieverConstants.RPARSER_REQPOLITENESS);
     initargs.add((tmpValue == null)?Integer.MAX_VALUE:Integer.parseInt(tmpValue));
 
     try {
-      tmpValue = this.getParserClassName(pParserProps.getProperty(EntityRetrieverConstants.RPARSER_NAME));
+      tmpValue = this.getParserClassName(pParserProps.getProperty(RetrieverConstants.RPARSER_NAME));
       if (tmpValue != null) {
         Constructor<?> constr = Class.forName(tmpValue).getConstructor(AbstractParser.constrParams);
         parser = (AbstractParser) constr.newInstance(initargs.toArray());  
+      } else {
+        getLogger().error("Parser not found.");
       }
     } catch (NoSuchMethodException e) {
       getLogger().error("Error trying to get the correct constructor.");
@@ -332,5 +343,47 @@ public class EntityRetriever {
 
     public static void setLogger(Logger lOGGER) {
       LOGGER = lOGGER;
+    }
+
+    /**
+     * @return the numRuns
+     */
+    public int getNumRuns() {
+      return numRuns;
+    }
+
+    /**
+     * @param numRuns the numRuns to set
+     */
+    public void setNumRuns(int numRuns) {
+      this.numRuns = numRuns;
+    }
+
+    /**
+     * @return the timeInterleave
+     */
+    public int getTimeInterleaved() {
+      return timeInterleaved;
+    }
+
+    /**
+     * @param timeInterleave the timeInterleave to set
+     */
+    public void setTimeInterleaved(int timeInterleave) {
+      this.timeInterleaved = timeInterleave;
+    }
+
+    /**
+     * @return the persistencyPlace
+     */
+    public String getPersistencyPlace() {
+      return backendEntities;
+    }
+
+    /**
+     * @param persistencyPlace the persistencyPlace to set
+     */
+    public void setPersistencyPlace(String persistencyPlace) {
+      this.backendEntities = persistencyPlace;
     }
 }

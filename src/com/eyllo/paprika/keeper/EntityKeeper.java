@@ -68,7 +68,8 @@ public class EntityKeeper {
         entitiesSource = args[1];
     }
     /** Getting the entities */
-    entKeeper.entities = entRetriever.getEntities(entitiesSource);
+    //TODO Update this call
+    //entKeeper.entities = entRetriever.getEntities(entitiesSource);
     /** Updates entities' geolocation */
     entKeeper.entities = EntityRetriever.updateGeoInfo(entKeeper.entities);
     /** Verifies entities' geolocation with geocoders available */
@@ -78,7 +79,7 @@ public class EntityKeeper {
     /** Saves entities within its specific store */
     saveEntities(dataStoreType, entKeeper.entities, "entityStore");
     /** Verifies all entities stored */
-    verifyEntities(dataStoreType, entKeeper.entities, "entityStore");
+    verifySavedEntities(dataStoreType, entKeeper.entities, "entityStore");
   }
 
   /**
@@ -114,7 +115,7 @@ public class EntityKeeper {
      * @param pEntities
      * @param pStoreName    Entity's store name for our data store
      */
-  public static void verifyEntities(String pDataStoreType,
+  public static void verifySavedEntities(String pDataStoreType,
       List<PersistentEntity> pEntities,
       String pStoreName){
     boolean flgVerif = true;
@@ -125,5 +126,10 @@ public class EntityKeeper {
     else
       LOGGER.info("All entities were NOT persisted and retrieved successfully");
   }
+
+    public void saveEntities(List<PersistentEntity> fetchEntities) {
+      // TODO Auto-generated method stub
+      
+    }
 
 }
