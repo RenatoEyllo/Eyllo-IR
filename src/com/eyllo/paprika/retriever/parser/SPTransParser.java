@@ -22,14 +22,7 @@ import com.eyllo.paprika.retriever.parser.elements.PersistentPoint;
  */
 public class SPTransParser extends AbstractParser {
 
-	/**
-	   * Gets the parser name.
-	   * @return name of the parser.
-	   */
-	  public static String getParserName() {
-	    return "sptrans";
-	  }
-
+  public static String NAME = "spTrans";
   private static final String HOME_PAGE = "http://www.sptrans.com.br/";
 
   /** Default API URL. */
@@ -59,6 +52,31 @@ public class SPTransParser extends AbstractParser {
   private boolean useLocal = false;
 
   private EntityKeeper eKeeper = new EntityKeeper ("index");
+
+  /**
+   * Constructor.
+   * @param pMaxPageNumber to be visited.
+   * @param pMaxNumEntities to be gathered.
+   * @param pName to identify parser.
+   * @param pOutPath to export entities to JSON file.
+   * @param pFetchUrl from where to extract entities.
+   * @param pLocal Whether or not the search process will include local search.
+   * @param pPoliteness  Time to wait between external request.
+   */
+  public SPTransParser(int pMaxPageNumber, int pMaxNumEntities,
+      String pFetchUrl, String pOutPath,
+      boolean pLocal, int pPoliteness) {
+    if (pFetchUrl.isEmpty())
+      pFetchUrl = OLHOVIVO_DEFAULT_API_URL;
+    if (pOutPath.isEmpty())
+      pOutPath = ParserConstants.DEFAULT_OUTPUT_PATH;
+    if (pPoliteness == 0)
+      pPoliteness = ParserConstants.DEFAULT_REQ_POLITENESS;
+    this.setParserName(NAME);
+    initialize(pMaxPageNumber, pMaxNumEntities, pOutPath, pFetchUrl, pLocal, pPoliteness);
+    getLogger().info("Running parser " + getParserName() + " using MAX values for retrieving.");
+    this.setAuthCookie(getCookieSpAuthenticate());
+  }
 
   /**
    * Constructor.

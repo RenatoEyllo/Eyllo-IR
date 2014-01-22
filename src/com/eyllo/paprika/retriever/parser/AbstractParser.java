@@ -18,7 +18,7 @@ import com.eyllo.paprika.retriever.parser.elements.PersistentEntity;
 public abstract class AbstractParser {
 
   /**  Parser name. */
-  static private String parserName;
+  private String parserName;
 
   /** Scenario Id used */
   private int scenarioId;
@@ -52,6 +52,14 @@ public abstract class AbstractParser {
 
   /** Logger to help us write write info/debug/error messages. */
   private static Logger LOGGER = LoggerFactory.getLogger(AbstractParser.class);;
+
+  /** Field classes needed to get a constructor. */
+  public static Class<?> constrParams[] = {int.class, int.class, java.lang.String.class, java.lang.String.class, boolean.class, int.class};
+
+  /** 
+   * Default Constructor.
+   */
+  public AbstractParser() {}
 
   /**
    * Constructor.
@@ -231,16 +239,8 @@ public abstract class AbstractParser {
    * Gets the parser name.
    * @return name of the parser.
    */
-  public static String getParserName() {
+  public String getParserName() {
     return parserName;
-  }
-
-  /**
-   * Sets the parser name
-   * @param parserName Parser name to be used.
-   */
-  public static void setName(String pName) {
-    parserName = pName;
   }
 
   /**
@@ -339,5 +339,9 @@ public abstract class AbstractParser {
    */
   public void setPoliteness(int politeness) {
     this.req_politeness = politeness;
+  }
+
+  public void setParserName(String parserName) {
+    this.parserName = parserName;
   }
 }
