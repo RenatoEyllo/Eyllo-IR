@@ -10,8 +10,6 @@ import org.apache.gora.util.GoraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eyllo.paprika.retriever.EntityRetriever;
-import com.eyllo.paprika.retriever.parser.RioGuiaParser;
 import com.eyllo.paprika.retriever.parser.elements.PersistentEntity;
 
 /**
@@ -57,7 +55,6 @@ public class EntityKeeper {
 
   /**
    * @param args
-   */
   public static void main(String[] args) {
     EntityRetriever entRetriever = new EntityRetriever();
     String dataStoreType = "cassandra";
@@ -67,21 +64,21 @@ public class EntityKeeper {
         dataStoreType = args[0];
         entitiesSource = args[1];
     }
-    /** Getting the entities */
+    // Getting the entities 
     //TODO Update this call
     //entKeeper.entities = entRetriever.getEntities(entitiesSource);
-    /** Updates entities' geolocation */
+    // Updates entities' geolocation 
     entKeeper.entities = EntityRetriever.updateGeoInfo(entKeeper.entities);
-    /** Verifies entities' geolocation with geocoders available */
+    // Verifies entities' geolocation with geocoders available 
     entKeeper.entities = EntityRetriever.verifyGeoInfo(entKeeper.entities);
     //ParseUtils.printPersistentEntities(entKeeper.entities);
     //entKeeper.entities = EntityRetriever.getGeoValidatedEntities(entKeeper.entities);
-    /** Saves entities within its specific store */
+    // Saves entities within its specific store 
     saveEntities(dataStoreType, entKeeper.entities, "entityStore");
-    /** Verifies all entities stored */
+    // Verifies all entities stored 
     verifySavedEntities(dataStoreType, entKeeper.entities, "entityStore");
   }
-
+*/
   /**
    * Saves entities within a specific data store
    * @param pDataStoreType
@@ -129,7 +126,7 @@ public class EntityKeeper {
 
     public void saveEntities(List<PersistentEntity> fetchEntities) {
       // TODO Auto-generated method stub
-      
+      //dataLayer.s
     }
 
 }

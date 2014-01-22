@@ -116,12 +116,12 @@ public class SPTransParser extends AbstractParser {
         while ( iCnt < this.getMaxPageNumber() & iCnt < searchCombs.length){
           // get all lines and insert them into a different collection paprika.sptransLinhas
           String url = (OLHOVIVO_DEFAULT_API_URL + OLHOVIVO_API_SEARCH).replace(OLHOVIVO_SEARCH_TERM, searchCombs[iCnt]);
-          this.waitPolitely();
           parseSearchResults(url);
           // get stops based on each line and create their geoTags to insert them
           //getLogger().debug("Getting: "+ fetchUrl.replace(ParserConstants.PARAM_NUM, String.valueOf(iCnt)));
           //this.parseSearchResults(fetchUrl.replace(ParserConstants.PARAM_NUM, String.valueOf(iCnt)));
           iCnt += 1;
+          this.waitPolitely();
         }
         getLogger().info("Hubo # entidades : " + this.totalEntities());
         this.completeEntityInfo();
@@ -143,6 +143,7 @@ public class SPTransParser extends AbstractParser {
         pObjs.put(tmpObj.get("CodigoLinha").toString(), tmpObj);
         System.out.println(jObj);
       }
+      // This needs to be done within local storage as a different request is needed
       if (!pObjs.isEmpty())
         eKeeper.save(pObjs, pLinesSchemaName, pLinesTypeName);
     }
@@ -156,23 +157,19 @@ public class SPTransParser extends AbstractParser {
     parseIndividualEnt(null);
   }
 
-  private PersistentEntity jsonToPersistentEntity(JSONObject pJSONObject) {
-    PersistentEntity pEntity = new PersistentEntity();
-    pEntity.addToScenarioId(SCENARIO_ID);
-    pEntity.setHomepage(new Utf8(HOME_PAGE));
-    pEntity.setName(new Utf8(pJSONObject.get("Nome").toString()));
-    pEntity.setDescription(new Utf8("CodigoLinha:" + pJSONObject.get("CodigoLinha")));
-    PersistentPoint pPoint = new PersistentPoint();
-    pPoint.addToCoordinates(Double.parseDouble(pJSONObject.get("Longitude").toString()));
-    pPoint.addToCoordinates(Double.parseDouble(pJSONObject.get("Latitude").toString()));
-    pPoint.setAddress(new Utf8(pJSONObject.get("Endereco").toString()));
-    pPoint.setAccuracy(EylloLocation.GEOCODER_VERIF_ACC_HIGH);
-    pEntity.setPersistentpoint(pPoint);
-    return pEntity;
-  }
-
+  /**
+   * Parses individual entities.
+   */
   @Override
   public void parseIndividualEnt(PersistentEntity pEntity) {
+    parseStopsFromLines ();
+    parseStopsForecastFromLines ();
+  }
+
+  public void parseStopsForecastFromLines() {
+    
+  }
+  public void parseStopsFromLines() {
     if (!isGetLocal()) {
       // 1. Get all data from the keeper
       //TODO this should come according the isGetLocal parameter as well
@@ -195,7 +192,7 @@ public class SPTransParser extends AbstractParser {
             pObjs.put(tmpObj.get("CodigoParada").toString(), tmpObj);
             eKeeper.save(pObjs, pStopsSchemaName, pStopsTypeName);
             // 4. Create PersistentEntity objects to export
-            this.pEntities.add(jsonToPersistentEntity(tmpObj));
+            this.pEntities.add(olhoVivoJsonToPersistentEntity(tmpObj));
           }
         }
       }
@@ -203,12 +200,13 @@ public class SPTransParser extends AbstractParser {
     else {
       getLogger().info("Setting entities from saved information.");
       List lineStops = eKeeper.retrieve(pStopsSchemaName, pStopsTypeName);
+      // Keeping retrieved entities in-memory to be saved by Retriever
       getLogger().info("Deleting in-memory stored entities.");
       this.pEntities = new ArrayList<PersistentEntity>();
       for(Object lineStop : lineStops) {
         JSONObject tmpObj = ParserUtils.getJsonObj(((SearchHit)lineStop).sourceAsMap());
         System.out.println(tmpObj);
-        this.pEntities.add(jsonToPersistentEntity(tmpObj));
+        this.pEntities.add(olhoVivoJsonToPersistentEntity(tmpObj));
       }
     }
     for (PersistentEntity pEnt : this.pEntities)
@@ -219,6 +217,26 @@ public class SPTransParser extends AbstractParser {
     String authUrl = OLHOVIVO_DEFAULT_API_URL + OLHOVIVO_API_AUTH + OLHOVIVO_DEFAULT_API_TOKEN;
     String cookieVal = ParserUtils.getCookie(authUrl, OLHOVIVO_COOKIE_NAME);
     return cookieVal;
+  }
+
+  /**
+   * Transforms a JSON string from OlhoVivo API into a PersistentEntity
+   * @param pJSONObject from OlhoVivo API.
+   * @return PersistentEntity from JSON object.
+   */
+  private PersistentEntity olhoVivoJsonToPersistentEntity(JSONObject pJSONObject) {
+    PersistentEntity pEntity = new PersistentEntity();
+    pEntity.addToScenarioId(SCENARIO_ID);
+    pEntity.setHomepage(new Utf8(HOME_PAGE));
+    pEntity.setName(new Utf8(pJSONObject.get("Nome").toString()));
+    pEntity.setDescription(new Utf8("CodigoLinha:" + pJSONObject.get("CodigoLinha")));
+    PersistentPoint pPoint = new PersistentPoint();
+    pPoint.addToCoordinates(Double.parseDouble(pJSONObject.get("Longitude").toString()));
+    pPoint.addToCoordinates(Double.parseDouble(pJSONObject.get("Latitude").toString()));
+    pPoint.setAddress(new Utf8(pJSONObject.get("Endereco").toString()));
+    pPoint.setAccuracy(EylloLocation.GEOCODER_VERIF_ACC_HIGH);
+    pEntity.setPersistentpoint(pPoint);
+    return pEntity;
   }
 
   /**

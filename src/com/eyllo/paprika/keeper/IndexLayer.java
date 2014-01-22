@@ -262,6 +262,12 @@ public class IndexLayer<K, V> extends AbstractDataLayer<K, V> {
     
   }
 
+  @Override
+  public boolean saveElements(Map<K, V> pElems, String... params) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
   /**
    * Performs clean up for the class.
    */
@@ -274,17 +280,16 @@ public class IndexLayer<K, V> extends AbstractDataLayer<K, V> {
   /**
    * Main method used for testing inner-class components.
    * @param args
-   */
   public static void main(String args[]){
     // defining a social retriever object
-    /*String userName = "naturanet";
+    //String userName = "naturanet";
     SocialRetriever socRetriever = new SocialRetriever();
     Properties props = UtilsConnection.
         getProperties(SocialRetriever.DEFAULT_SOCIALCONNS_PROP);
     socRetriever.setSocialConn(SocialConnectionFactory.
         createConnection(props,UtilsConnection.TWITTER));
     List<JSONObject> tweets = socRetriever.getSocialConn().fetchUserPosts(userName,10);
-    System.out.println(tweets);*/
+    System.out.println(tweets);
 
     // defining an indexing layer object
     String indexEntities = "eyllo_entities";
@@ -292,10 +297,10 @@ public class IndexLayer<K, V> extends AbstractDataLayer<K, V> {
     
     IndexLayer iLayer = new IndexLayer();
     //List<PersistentEntity> entities = new ApontadorParser("hotels", 1, 20).getEntities();
-    /*List<PersistentEntity> entities = EntityRetriever.getEntities(ApontadorParser.NAME);
-    for (PersistentEntity ent : entities){
-      iLayer.index(ent, indexEntities, indexAttrName, UUID.randomUUID().toString());
-    }*/
+    //List<PersistentEntity> entities = EntityRetriever.getEntities(ApontadorParser.NAME);
+    //for (PersistentEntity ent : entities){
+    //  iLayer.index(ent, indexEntities, indexAttrName, UUID.randomUUID().toString());
+    //}
     
     iLayer.search(indexEntities);
     //GetResponse response = iLayer.get("twitter", "tweet", "1");
@@ -303,7 +308,7 @@ public class IndexLayer<K, V> extends AbstractDataLayer<K, V> {
     //System.out.println(response.getSourceAsString());
     //on shutdown
     iLayer.cleanup();
-  }
+  }*/
 
   /**
    * @return the elSearchClient

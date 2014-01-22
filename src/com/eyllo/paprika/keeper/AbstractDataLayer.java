@@ -1,6 +1,7 @@
 package com.eyllo.paprika.keeper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Class used to represent different data layers that
@@ -22,6 +23,8 @@ public abstract class AbstractDataLayer<K, V> {
     AbstractDataLayer constructed = null;
     if (pDataLayerType.equals("index"))
       constructed = new IndexLayer();
+    if (pDataLayerType.equals("index"))
+      constructed = new FileLayer();
    return constructed;
   }
 
@@ -45,6 +48,14 @@ public abstract class AbstractDataLayer<K, V> {
    * @return V      value to be obtained.
    */
   public abstract V get(K key);
+
+  /**
+   * Saves a group of elements within the data layer.
+   * @param pElems  Elements to be stored.
+   * @param params  Extra parameters.
+   * @return
+   */
+  public abstract boolean saveElements(Map<K,V> pElems, String ... params);
 
   /**
    * Gets an instance of the DataLayer being used.
