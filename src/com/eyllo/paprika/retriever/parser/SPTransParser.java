@@ -4,12 +4,16 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.util.Utf8;
+import org.elasticsearch.common.joda.time.DateTime;
 import org.elasticsearch.search.SearchHit;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -183,7 +187,7 @@ public class SPTransParser extends AbstractParser {
     if (useLocal()) {
       // 1. Get all data from the keeper
       //TODO this should come according the isGetLocal parameter as well
-      List busLines = eKeeper.retrieve(pLinesSchemaName, pLinesTypeName);
+     /* List busLines = eKeeper.retrieve(pLinesSchemaName, pLinesTypeName);
      // 2. For each JSON object from the keeper, perform a request.
       for(Object busLine : busLines) {
         String lineCode = ((SearchHit)busLine).getSource().get("CodigoLinha").toString();
@@ -191,7 +195,7 @@ public class SPTransParser extends AbstractParser {
         Map<String, String> cookies = new HashMap<String, String> ();
         cookies.put(OV_COOKIE_NAME, this.getAuthCookie());
         Document doc = ParserUtils.connectCookiePostUrl(url, cookies);
-        /*TODO These elements should be parse correctly.
+        TODO These elements should be parse correctly.
          * if (doc != null) {
           JSONArray jArray = (JSONArray)ParserUtils.getJsonObj(doc.text());
           System.out.println(url + ": " + jArray.size());
@@ -205,12 +209,12 @@ public class SPTransParser extends AbstractParser {
             // 4. Create PersistentEntity objects to export
             this.pEntities.add(olhoVivoJsonToPersistentEntity(tmpObj));
           }
-        }*/
-      }
+        }
+      }*/
     }
   }
 
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings({ "rawtypes", "unused" })
   public void parseStopsForecastFromStops() {
     if (useLocal()) {
       // 1. Get all data from the keeper
@@ -227,21 +231,53 @@ public class SPTransParser extends AbstractParser {
         cookies.put(OV_COOKIE_NAME, this.getAuthCookie());
         Document doc = ParserUtils.connectCookiePostUrl(url, cookies);
         System.out.println(doc.text());
-        /*TODO These elements should be parse correctly.
-         * if (doc != null) {
-          JSONArray jArray = (JSONArray)ParserUtils.getJsonObj(doc.text());
-          System.out.println(url + ": " + jArray.size());
-          Map<String, JSONObject> pObjs = new HashMap<String, JSONObject>();
-          for (Object jObj : jArray) {
-            // 3. Give new data to keeper
-            JSONObject tmpObj = (JSONObject)jObj;
-            tmpObj.put("CodigoLinha", lineCode);
-            pObjs.put(tmpObj.get("CodigoParada").toString(), tmpObj);
-            eKeeper.save(pObjs, pStopsForecastSchemaName, pStopsForecastTypeName);
-            // 4. Create PersistentEntity objects to export
-            this.pEntities.add(olhoVivoJsonToPersistentEntity(tmpObj));
+        /*TODO These elements should be parse correctly. **/
+        if (doc != null) {
+          JSONObject jsonObj = (JSONObject)ParserUtils.getJsonObj(doc.text());
+          System.out.println(jsonObj.get("hr"));
+          SimpleDateFormat inFormat = new SimpleDateFormat("HH:mm");
+          Date date1 = null, date2 = null;
+          try {
+            date1 = inFormat.parse(jsonObj.get("hr").toString());
+            System.out.println(date1.toString());
+          } catch (ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
           }
-        }*/
+          if (jsonObj.get("p").toString().contains("null") || jsonObj.get("p").toString().isEmpty())
+            continue;
+          JSONArray linesArray = (JSONArray) ((JSONObject)jsonObj.get("p")).get("l");
+          System.out.println(url + ": " + linesArray.size());
+          if (linesArray != null && linesArray.size() > 0) {
+            Map<String, JSONObject> pObjs = new HashMap<String, JSONObject>();
+            for (Object busLineGotten : linesArray) {
+              JSONObject busLineJson = (JSONObject) busLineGotten;
+              // Bus line code
+              System.out.println(busLineJson.get("c"));
+              // Bus sign
+              System.out.println(busLineJson.get("lt0") + " - " + busLineJson.get("lt1"));
+              // Bus arrival time
+              JSONArray busesArrivals = (JSONArray) busLineJson.get("vs");
+              // if there are any bus arrivals, then get the first one as it is the only one we care
+              if (busesArrivals.size() >0) {
+                JSONObject busArrival = (JSONObject)busesArrivals.get(0);
+                System.out.println(busArrival.get("t"));
+                try {
+                  date2 = inFormat.parse(busArrival.get("t").toString());
+                } catch (ParseException e) {
+                  // TODO Auto-generated catch block
+                  e.printStackTrace();
+                }
+              }
+              long difference = date2.getTime() - date1.getTime();
+              System.out.println("Time to arrival: " + difference/1000/60 + " minutes.");
+              //pObjs.put(tmpObj.get("CodigoParada").toString(), tmpObj);
+              //eKeeper.save(pObjs, pStopsForecastSchemaName, pStopsForecastTypeName);
+              // 4. Create PersistentEntity objects to export
+              //this.pEntities.add(olhoVivoJsonToPersistentEntity(tmpObj));
+            }
+          }//END-LINES_ARRAY
+        }
       }
     }
   }
