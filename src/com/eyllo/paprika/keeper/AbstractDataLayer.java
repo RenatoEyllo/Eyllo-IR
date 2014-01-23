@@ -23,7 +23,7 @@ public abstract class AbstractDataLayer<K, V> {
     AbstractDataLayer constructed = null;
     if (pDataLayerType.equals("index"))
       constructed = new IndexLayer();
-    if (pDataLayerType.equals("index"))
+    if (pDataLayerType.equals("file"))
       constructed = new FileLayer();
    return constructed;
   }

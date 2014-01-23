@@ -15,7 +15,7 @@ public class RetrieverConstants {
 
   /* Properties for Retriever. */
   /** Number of runs Entity retriever will perform. */
-  public static String RET_RUNS_NUM = "retriever.runs.number=1000";
+  public static String RET_RUNS_NUM = "retriever.runs.number";
   /** Time between retriever runs (seconds). */
   public static String RET_RUNS_INTERLEAVE = "retriever.runs.interleave";
   /** Helps us decide where to store retrieved entities. */

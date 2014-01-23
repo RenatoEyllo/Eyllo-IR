@@ -1,5 +1,9 @@
 package com.eyllo.paprika.retriever.parser;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,21 +31,26 @@ public class SPTransParser extends AbstractParser {
   /** Site home page. */
   private static final String HOME_PAGE = "http://www.sptrans.com.br/";
   /** Default API URL. */
-  private static final String OLHOVIVO_DEFAULT_API_URL = "http://api.olhovivo.sptrans.com.br/v0";
+  private static final String OV_DEFAULT_API_URL = "http://api.olhovivo.sptrans.com.br/v0";
   /** API Token. */
-  private static final String OLHOVIVO_DEFAULT_API_TOKEN = "51d279ac1e7cc3ceac47590e9f0acbbafa79bb9ee7fb8e164b77837eede65aaf";
+  private static final String OV_DEFAULT_API_TOKEN = "51d279ac1e7cc3ceac47590e9f0acbbafa79bb9ee7fb8e164b77837eede65aaf";
   /** API Authenticate URL. */
-  private static final String OLHOVIVO_API_AUTH = "/Login/Autenticar?token=";
+  private static final String OV_API_AUTH = "/Login/Autenticar?token=";
   /** API Search URL. */
-  private static final String OLHOVIVO_SEARCH_TERM = "TERM";
+  private static final String OV_SEARCH_TERM = "TERM";
   /** API URL for getting specific search terms. */
-  private static final String OLHOVIVO_API_SEARCH = "/Linha/Buscar?termosBusca=" + OLHOVIVO_SEARCH_TERM;
+  private static final String OV_API_SEARCH = "/Linha/Buscar?termosBusca=" + OV_SEARCH_TERM;
   /** API URL for getting stop signs of a bus line. */
-  private static final String OLHOVIVO_API_STOPS_SEARCH = "/Parada/BuscarParadasPorLinha?codigoLinha=";
+  private static final String OV_API_STOPS_SEARCH = "/Parada/BuscarParadasPorLinha?codigoLinha=";
   /** API URL for getting stops forecast depending on line numbers. */
-  private static final String OLHOVIVO_API_STOPS_FORECAST_SEARCH = "/Previsao/Linha?codigoLinha=";
+  private static final String OV_API_STOPS_FORECAST_LINE_SEARCH = "/Previsao/Linha?codigoLinha=";
+  /** API URL for getting stops forecast depending on stops' numbers. */
+  private static final String OV_API_STOPS_FORECAST_SEARCH = "/Previsao/Parada?codigoParada=";
   /** Cookie name for authentication. */
-  private static final String OLHOVIVO_COOKIE_NAME = "apiCredentials";
+  private static final String OV_COOKIE_NAME = "apiCredentials";
+  //TODO this parameter should be passed, not HARDCODED!!!!
+  /** Stops file Path. */
+  private static String stopFilePath = "/home/renato/workspace/Eyllo-IR/res/stops.txt";
 
   /** Authentication cookie used inside the API. */
   private String authCookie;
@@ -51,8 +60,9 @@ public class SPTransParser extends AbstractParser {
   private final String pLinesTypeName = "linha";
   private final String pStopsSchemaName = "linhas_paradas";
   private final String pStopsTypeName = "paradas";
+  private final String pStopsForecastSchemaName = "previsao_linhas_paradas";
+  private final String pStopsForecastTypeName = "previsao_paradas";
   private final int SCENARIO_ID = 27;
-  private boolean useLocal = false;
 
   private EntityKeeper eKeeper = new EntityKeeper ("index");
 
@@ -70,14 +80,14 @@ public class SPTransParser extends AbstractParser {
       String pFetchUrl, String pOutPath,
       boolean pLocal, int pPoliteness) {
     if (pFetchUrl.isEmpty())
-      pFetchUrl = OLHOVIVO_DEFAULT_API_URL;
+      pFetchUrl = OV_DEFAULT_API_URL;
     if (pOutPath.isEmpty())
       pOutPath = ParserConstants.DEFAULT_OUTPUT_PATH;
     if (pPoliteness == 0)
       pPoliteness = ParserConstants.DEFAULT_REQ_POLITENESS;
     this.setParserName(NAME);
     initialize(pMaxPageNumber, pMaxNumEntities, pOutPath, pFetchUrl, pLocal, pPoliteness);
-    getLogger().info("Running parser " + getParserName() + " using MAX values for retrieving.");
+    getLogger().info("Running parser *" + getParserName() + "* using MAX values for retrieving.");
     this.setAuthCookie(getCookieSpAuthenticate());
   }
 
@@ -88,7 +98,7 @@ public class SPTransParser extends AbstractParser {
    */
   public SPTransParser(int pMaxPageNumber, int pMaxNumEntities, boolean pLocal) {
     super(pMaxPageNumber, pMaxNumEntities,
-        ParserConstants.DEFAULT_OUTPUT_PATH, OLHOVIVO_DEFAULT_API_URL,
+        ParserConstants.DEFAULT_OUTPUT_PATH, OV_DEFAULT_API_URL,
         pLocal, ParserConstants.DEFAULT_REQ_POLITENESS);
     this.setAuthCookie(getCookieSpAuthenticate());
     
@@ -98,7 +108,7 @@ public class SPTransParser extends AbstractParser {
    * Default constructor.
    */
   public SPTransParser() {
-    super(Integer.MAX_VALUE, Integer.MAX_VALUE, OLHOVIVO_DEFAULT_API_URL);
+    super(Integer.MAX_VALUE, Integer.MAX_VALUE, OV_DEFAULT_API_URL);
     getLogger().info("Running parser " + getParserName() + " using MAX values for retrieving.");
     this.setAuthCookie(getCookieSpAuthenticate());
   }
@@ -115,7 +125,7 @@ public class SPTransParser extends AbstractParser {
         String []searchCombs = getSearchCombinations();
         while ( iCnt < this.getMaxPageNumber() & iCnt < searchCombs.length){
           // get all lines and insert them into a different collection paprika.sptransLinhas
-          String url = (OLHOVIVO_DEFAULT_API_URL + OLHOVIVO_API_SEARCH).replace(OLHOVIVO_SEARCH_TERM, searchCombs[iCnt]);
+          String url = (OV_DEFAULT_API_URL + OV_API_SEARCH).replace(OV_SEARCH_TERM, searchCombs[iCnt]);
           parseSearchResults(url);
           // get stops based on each line and create their geoTags to insert them
           //getLogger().debug("Getting: "+ fetchUrl.replace(ParserConstants.PARAM_NUM, String.valueOf(iCnt)));
@@ -132,7 +142,7 @@ public class SPTransParser extends AbstractParser {
   @Override
   public void parseSearchResults(String url) {
     Map<String, String> cookies = new HashMap<String, String> ();
-    cookies.put(OLHOVIVO_COOKIE_NAME, this.getAuthCookie());
+    cookies.put(OV_COOKIE_NAME, this.getAuthCookie());
     Document doc = ParserUtils.connectCookiePostUrl(url, cookies);
     if (doc != null) {
       JSONArray jArray = (JSONArray)ParserUtils.getJsonObj(doc.text());
@@ -162,24 +172,133 @@ public class SPTransParser extends AbstractParser {
    */
   @Override
   public void parseIndividualEnt(PersistentEntity pEntity) {
-    parseStopsFromLines ();
-    parseStopsForecastFromLines ();
+    //parseStopsFromLines ();
+    parseStopsForecastFromStops ();
   }
 
+  /**
+   * Retrieves and parses bus arrivals using bus line's codes.
+   */
   public void parseStopsForecastFromLines() {
-    
-  }
-  public void parseStopsFromLines() {
-    if (!isGetLocal()) {
+    if (useLocal()) {
       // 1. Get all data from the keeper
       //TODO this should come according the isGetLocal parameter as well
       List busLines = eKeeper.retrieve(pLinesSchemaName, pLinesTypeName);
      // 2. For each JSON object from the keeper, perform a request.
       for(Object busLine : busLines) {
         String lineCode = ((SearchHit)busLine).getSource().get("CodigoLinha").toString();
-        String url = OLHOVIVO_DEFAULT_API_URL + OLHOVIVO_API_STOPS_SEARCH + lineCode;
+        String url = OV_DEFAULT_API_URL + OV_API_STOPS_FORECAST_LINE_SEARCH + lineCode;
         Map<String, String> cookies = new HashMap<String, String> ();
-        cookies.put(OLHOVIVO_COOKIE_NAME, this.getAuthCookie());
+        cookies.put(OV_COOKIE_NAME, this.getAuthCookie());
+        Document doc = ParserUtils.connectCookiePostUrl(url, cookies);
+        /*TODO These elements should be parse correctly.
+         * if (doc != null) {
+          JSONArray jArray = (JSONArray)ParserUtils.getJsonObj(doc.text());
+          System.out.println(url + ": " + jArray.size());
+          Map<String, JSONObject> pObjs = new HashMap<String, JSONObject>();
+          for (Object jObj : jArray) {
+            // 3. Give new data to keeper
+            JSONObject tmpObj = (JSONObject)jObj;
+            tmpObj.put("CodigoLinha", lineCode);
+            pObjs.put(tmpObj.get("CodigoParada").toString(), tmpObj);
+            eKeeper.save(pObjs, pStopsForecastSchemaName, pStopsForecastTypeName);
+            // 4. Create PersistentEntity objects to export
+            this.pEntities.add(olhoVivoJsonToPersistentEntity(tmpObj));
+          }
+        }*/
+      }
+    }
+  }
+
+  @SuppressWarnings("rawtypes")
+  public void parseStopsForecastFromStops() {
+    if (useLocal()) {
+      // 1. Get all data from the keeper
+      List busStops = eKeeper.retrieve(pStopsSchemaName, pStopsTypeName);
+      if (busStops == null) {
+        loadStopsFromGtfs();
+        busStops = eKeeper.retrieve(pStopsSchemaName, pStopsTypeName);
+      }
+     // 2. For each JSON object from the keeper, perform a request.
+      for(Object busLine : busStops) {
+        String stopCode = ((SearchHit)busLine).getSource().get("stop_id").toString();
+        String url = OV_DEFAULT_API_URL + OV_API_STOPS_FORECAST_SEARCH + stopCode ;
+        Map<String, String> cookies = new HashMap<String, String> ();
+        cookies.put(OV_COOKIE_NAME, this.getAuthCookie());
+        Document doc = ParserUtils.connectCookiePostUrl(url, cookies);
+        System.out.println(doc.text());
+        /*TODO These elements should be parse correctly.
+         * if (doc != null) {
+          JSONArray jArray = (JSONArray)ParserUtils.getJsonObj(doc.text());
+          System.out.println(url + ": " + jArray.size());
+          Map<String, JSONObject> pObjs = new HashMap<String, JSONObject>();
+          for (Object jObj : jArray) {
+            // 3. Give new data to keeper
+            JSONObject tmpObj = (JSONObject)jObj;
+            tmpObj.put("CodigoLinha", lineCode);
+            pObjs.put(tmpObj.get("CodigoParada").toString(), tmpObj);
+            eKeeper.save(pObjs, pStopsForecastSchemaName, pStopsForecastTypeName);
+            // 4. Create PersistentEntity objects to export
+            this.pEntities.add(olhoVivoJsonToPersistentEntity(tmpObj));
+          }
+        }*/
+      }
+    }
+  }
+
+  public void loadStopsFromGtfs() {
+    BufferedReader br = null;
+    String line = "";
+    String cvsSplitBy = ",";
+    try {
+      br = new BufferedReader(new FileReader(stopFilePath));
+      // Ignore file header.
+      br.readLine();
+      while ((line = br.readLine()) != null) {
+        // use comma as separator
+        String[] lineParts = line.split(cvsSplitBy);
+        //"stop_id","stop_name","stop_desc","stop_lat","stop_lon"
+        //18833,"Santo Amaro","Term. Santo Amaro Ref.: Av Pe Jose Maria Cep:04753-60",-23.654365,-46.713015
+        Map<String, JSONObject> pObjs = new HashMap<String, JSONObject>();
+        JSONObject tmpObj = new JSONObject();
+        tmpObj.put("stop_id", lineParts[0]);
+        tmpObj.put("stop_name", lineParts[1]);
+        tmpObj.put("stop_desc", lineParts[2]);
+        tmpObj.put("stop_lat", lineParts[3]);
+        tmpObj.put("stop_lon", lineParts[4]);
+        pObjs.put(lineParts[0], tmpObj);
+        //System.out.println(pObjs);
+        if (!pObjs.isEmpty())
+          eKeeper.save(pObjs, pStopsSchemaName, pStopsTypeName);
+      }
+    } catch (FileNotFoundException e) {
+      getLogger().error("Error trying to load Stops from GTFS file.");
+      e.printStackTrace();
+    } catch (IOException e) {
+      getLogger().error("Error trying to load Stops from GTFS file.");
+      e.printStackTrace();
+    } finally {
+      if (br != null) {
+        try {
+          br.close();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+  }
+
+  public void parseStopsFromLines() {
+    if (useLocal()) {
+      // 1. Get all data from the keeper
+      //TODO this should come according the isGetLocal parameter as well
+      List busLines = eKeeper.retrieve(pLinesSchemaName, pLinesTypeName);
+     // 2. For each JSON object from the keeper, perform a request.
+      for(Object busLine : busLines) {
+        String lineCode = ((SearchHit)busLine).getSource().get("CodigoLinha").toString();
+        String url = OV_DEFAULT_API_URL + OV_API_STOPS_SEARCH + lineCode;
+        Map<String, String> cookies = new HashMap<String, String> ();
+        cookies.put(OV_COOKIE_NAME, this.getAuthCookie());
         Document doc = ParserUtils.connectCookiePostUrl(url, cookies);
         if (doc != null) {
           JSONArray jArray = (JSONArray)ParserUtils.getJsonObj(doc.text());
@@ -192,30 +311,39 @@ public class SPTransParser extends AbstractParser {
             pObjs.put(tmpObj.get("CodigoParada").toString(), tmpObj);
             eKeeper.save(pObjs, pStopsSchemaName, pStopsTypeName);
             // 4. Create PersistentEntity objects to export
-            this.pEntities.add(olhoVivoJsonToPersistentEntity(tmpObj));
+            //this.pEntities.add(olhoVivoJsonToPersistentEntity(tmpObj));
           }
         }
+        this.waitPolitely();
       }
+    } else {
+      //TODO
+      getLogger().warn("Behaviour for not using local mode hasn't been implemented yet.");
     }
-    else {
-      getLogger().info("Setting entities from saved information.");
-      List lineStops = eKeeper.retrieve(pStopsSchemaName, pStopsTypeName);
-      // Keeping retrieved entities in-memory to be saved by Retriever
-      getLogger().info("Deleting in-memory stored entities.");
-      this.pEntities = new ArrayList<PersistentEntity>();
-      for(Object lineStop : lineStops) {
-        JSONObject tmpObj = ParserUtils.getJsonObj(((SearchHit)lineStop).sourceAsMap());
-        System.out.println(tmpObj);
-        this.pEntities.add(olhoVivoJsonToPersistentEntity(tmpObj));
-      }
-    }
-    for (PersistentEntity pEnt : this.pEntities)
-      System.out.println(pEnt.toJson());
+    //for (PersistentEntity pEnt : this.pEntities)
+    //  System.out.println(pEnt.toJson());
   }
 
+  /**
+   * Gets saved stops as a List of PersistentEntity.
+   * @return List containing all PersistentEntity representing stops.
+   */
+  public List<PersistentEntity> getSavedStops() {
+    getLogger().info("Setting entities from saved information.");
+    List lineStops = eKeeper.retrieve(pStopsSchemaName, pStopsTypeName);
+    // Keeping retrieved entities in-memory to be saved by Retriever
+    getLogger().info("Deleting in-memory stored entities.");
+    List<PersistentEntity> stopsList = new ArrayList<PersistentEntity>();
+    for(Object lineStop : lineStops) {
+      JSONObject tmpObj = ParserUtils.getJsonObj(((SearchHit)lineStop).sourceAsMap());
+      System.out.println(tmpObj);
+      stopsList.add(olhoVivoJsonToPersistentEntity(tmpObj));
+    }
+    return stopsList;
+  }
   private String getCookieSpAuthenticate() {
-    String authUrl = OLHOVIVO_DEFAULT_API_URL + OLHOVIVO_API_AUTH + OLHOVIVO_DEFAULT_API_TOKEN;
-    String cookieVal = ParserUtils.getCookie(authUrl, OLHOVIVO_COOKIE_NAME);
+    String authUrl = OV_DEFAULT_API_URL + OV_API_AUTH + OV_DEFAULT_API_TOKEN;
+    String cookieVal = ParserUtils.getCookie(authUrl, OV_COOKIE_NAME);
     return cookieVal;
   }
 
@@ -274,19 +402,5 @@ public class SPTransParser extends AbstractParser {
    */
   public void setAuthCookie(String authCookie) {
     this.authCookie = authCookie;
-  }
-
-  /**
-   * @return the getLocal
-   */
-  public boolean isGetLocal() {
-    return useLocal;
-  }
-
-  /**
-   * @param getLocal the getLocal to set
-   */
-  public void setGetLocal(boolean getLocal) {
-    this.useLocal = getLocal;
   }
 }

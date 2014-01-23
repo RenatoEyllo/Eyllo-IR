@@ -200,25 +200,32 @@ public class IndexLayer<K, V> extends AbstractDataLayer<K, V> {
   @Override
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public List<V> scan(String pIndexName, String pAttrName, String ... pExtra) {
-    List arrayList = new ArrayList ();
-    QueryBuilder qb = QueryBuilders.matchAllQuery();
-    SearchResponse scrollResp = getElSearchClient().prepareSearch(pIndexName)
-            .setSearchType(SearchType.SCAN)
-            .setScroll(new TimeValue(60000))
-            .setQuery(qb)
-            .setSize(100)
-            .execute().actionGet(); //100 hits per shard will be returned for each scroll
-    //Scroll until no hits are returned
-    while (true) {
-        scrollResp = getElSearchClient()
-            .prepareSearchScroll(scrollResp.getScrollId())
-            .setScroll(new TimeValue(600000)).execute().actionGet();
-        for (SearchHit hit : scrollResp.getHits())
-          arrayList.add(hit);
-        //Break condition: No hits are returned
-        if (scrollResp.getHits().getHits().length == 0) {
-            break;
-        }
+    List arrayList = null;
+    
+    try {
+      QueryBuilder qb = QueryBuilders.matchAllQuery();
+      SearchResponse scrollResp = getElSearchClient().prepareSearch(pIndexName)
+              .setSearchType(SearchType.SCAN)
+              .setScroll(new TimeValue(60000))
+              .setQuery(qb)
+              .setSize(100)
+              .execute().actionGet(); //100 hits per shard will be returned for each scroll
+      arrayList = new ArrayList ();
+      //Scroll until no hits are returned
+      while (true) {
+          scrollResp = getElSearchClient()
+              .prepareSearchScroll(scrollResp.getScrollId())
+              .setScroll(new TimeValue(600000)).execute().actionGet();
+          for (SearchHit hit : scrollResp.getHits())
+            arrayList.add(hit);
+          //Break condition: No hits are returned
+          if (scrollResp.getHits().getHits().length == 0) {
+              break;
+          }
+      }
+    } catch (org.elasticsearch.indices.IndexMissingException e) {
+      getLogger().error("Error while reading data from " + pIndexName);
+      e.printStackTrace();
     }
     return arrayList;
   }

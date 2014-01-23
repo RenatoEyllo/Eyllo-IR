@@ -57,11 +57,13 @@ public class EntityRetriever {
    */
   public void startRetriever(Properties pParserProperties) throws InterruptedException {
     setUpRetrieverProps(pParserProperties);
-    EntityKeeper entKeeper = new EntityKeeper(backendEntities);
-    while (numRuns > 0) {
+    // Keeper in charge to storing results for each parser run
+    EntityKeeper entKeeper = new EntityKeeper(this.backendEntities);
+    while (this.numRuns > 0) {
       entKeeper.saveEntities(parser.fetchEntities());
-      this.wait(numRuns);
+      this.wait(this.timeInterleaved);
       System.out.println(parser.getParserName());
+      this.numRuns --;
     }
   }
 
@@ -72,9 +74,9 @@ public class EntityRetriever {
   public void setUpRetrieverProps(Properties pRetrieverProps) {
     String tmpValue = pRetrieverProps.getProperty(RetrieverConstants.RET_BACKEND_ENTITIES);
     backendEntities = (tmpValue == null|| tmpValue.isEmpty())?RetrieverConstants.DEFAULT_BACKENDENT:tmpValue;
-    tmpValue = pRetrieverProps.getProperty(RetrieverConstants.RET_BACKEND_ENTITIES);
+    tmpValue = pRetrieverProps.getProperty(RetrieverConstants.RET_RUNS_NUM);
     numRuns = (tmpValue == null|| tmpValue.isEmpty())?RetrieverConstants.DEFAULT_NUM_RUNS:Integer.parseInt(tmpValue);
-    tmpValue = pRetrieverProps.getProperty(RetrieverConstants.RET_BACKEND_ENTITIES);
+    tmpValue = pRetrieverProps.getProperty(RetrieverConstants.RET_RUNS_INTERLEAVE);
     timeInterleaved = (tmpValue == null|| tmpValue.isEmpty())?RetrieverConstants.DEFAULT_TIME_INTERLEAVED:Integer.parseInt(tmpValue);
     parser = getCorrectParser(pRetrieverProps);
     if (parser == null)

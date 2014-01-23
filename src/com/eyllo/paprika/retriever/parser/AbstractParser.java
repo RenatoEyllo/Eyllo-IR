@@ -190,7 +190,7 @@ public abstract class AbstractParser {
   /**
    * Waits politely for n mili seconds.
    */
-  public void waitPolitely() {
+  public synchronized void waitPolitely() {
     try {
       wait(this.getPoliteness());
     } catch (InterruptedException e) {
