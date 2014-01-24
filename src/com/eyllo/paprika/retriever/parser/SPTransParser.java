@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.util.Utf8;
-import org.elasticsearch.common.joda.time.DateTime;
 import org.elasticsearch.search.SearchHit;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -217,6 +216,8 @@ public class SPTransParser extends AbstractParser {
   @SuppressWarnings({ "rawtypes", "unused" })
   public void parseStopsForecastFromStops() {
     if (useLocal()) {
+      Date updTime = null, frcTime = null;
+      SimpleDateFormat inFormat = new SimpleDateFormat("HH:mm");
       // 1. Get all data from the keeper
       List busStops = eKeeper.retrieve(pStopsSchemaName, pStopsTypeName);
       if (busStops == null) {
@@ -232,56 +233,53 @@ public class SPTransParser extends AbstractParser {
         Document doc = ParserUtils.connectCookiePostUrl(url, cookies);
         System.out.println(doc.text());
         /*TODO These elements should be parse correctly. **/
-        if (doc != null) {
-          JSONObject jsonObj = (JSONObject)ParserUtils.getJsonObj(doc.text());
-          System.out.println(jsonObj.get("hr"));
-          SimpleDateFormat inFormat = new SimpleDateFormat("HH:mm");
-          Date date1 = null, date2 = null;
-          try {
-            date1 = inFormat.parse(jsonObj.get("hr").toString());
-            System.out.println(date1.toString());
-          } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
-          if (jsonObj.get("p").toString().contains("null") || jsonObj.get("p").toString().isEmpty())
-            continue;
-          JSONArray linesArray = (JSONArray) ((JSONObject)jsonObj.get("p")).get("l");
-          System.out.println(url + ": " + linesArray.size());
-          if (linesArray != null && linesArray.size() > 0) {
-            Map<String, JSONObject> pObjs = new HashMap<String, JSONObject>();
-            for (Object busLineGotten : linesArray) {
-              JSONObject busLineJson = (JSONObject) busLineGotten;
-              // Bus line code
-              System.out.println(busLineJson.get("c"));
-              // Bus sign
-              System.out.println(busLineJson.get("lt0") + " - " + busLineJson.get("lt1"));
-              // Bus arrival time
-              JSONArray busesArrivals = (JSONArray) busLineJson.get("vs");
-              // if there are any bus arrivals, then get the first one as it is the only one we care
-              if (busesArrivals.size() >0) {
-                JSONObject busArrival = (JSONObject)busesArrivals.get(0);
-                System.out.println(busArrival.get("t"));
-                try {
-                  date2 = inFormat.parse(busArrival.get("t").toString());
-                } catch (ParseException e) {
-                  // TODO Auto-generated catch block
-                  e.printStackTrace();
+        if (doc != null && !doc.text().equals("")) {
+          JSONObject completeJsonObj = (JSONObject)ParserUtils.getJsonObj(doc.text());
+          if (!completeJsonObj.get("p").toString().contains("null") &&
+              !completeJsonObj.get("p").toString().isEmpty()) {
+            JSONArray linesArray = (JSONArray) ((JSONObject)completeJsonObj.get("p")).get("l");
+            System.out.println(url + ": " + linesArray.size());
+            if (linesArray != null && linesArray.size() > 0) {
+              Map<String, JSONObject> pObjs = new HashMap<String, JSONObject>();
+              for (Object busLineGotten : linesArray) {
+                JSONObject busLineJson = (JSONObject) busLineGotten;
+                // Bus line code
+                System.out.println(busLineJson.get("c"));
+                // Bus sign
+                System.out.println(busLineJson.get("lt0") + " - " + busLineJson.get("lt1"));
+                // Bus arrival time
+                JSONArray busesArrivals = (JSONArray) busLineJson.get("vs");
+                // if there are any bus arrivals, then get the first one as it is the only one we care
+                if (busesArrivals.size() >0) {
+                  JSONObject busArrival = (JSONObject)busesArrivals.get(0);
+                  System.out.println(busArrival.get("t"));
+                  try {
+                    updTime = inFormat.parse(completeJsonObj.get("hr").toString());
+                    System.out.println(updTime.toString());
+                    frcTime = inFormat.parse(busArrival.get("t").toString());
+                  } catch (ParseException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                  }
                 }
-              }
-              long difference = date2.getTime() - date1.getTime();
-              System.out.println("Time to arrival: " + difference/1000/60 + " minutes.");
-              //pObjs.put(tmpObj.get("CodigoParada").toString(), tmpObj);
-              //eKeeper.save(pObjs, pStopsForecastSchemaName, pStopsForecastTypeName);
-              // 4. Create PersistentEntity objects to export
-              //this.pEntities.add(olhoVivoJsonToPersistentEntity(tmpObj));
-            }
-          }//END-LINES_ARRAY
+                long difference = frcTime.getTime() - updTime.getTime();
+                System.out.println("Time to arrival: " + difference/1000/60 + " minutes.");
+                //pObjs.put(tmpObj.get("CodigoParada").toString(), tmpObj);
+                //eKeeper.save(pObjs, pStopsForecastSchemaName, pStopsForecastTypeName);
+                // 4. Create PersistentEntity objects to export
+                //this.pEntities.add(olhoVivoJsonToPersistentEntity(tmpObj));
+              }//END-FOR_LINES_ARRAY
+            }//END-IF_LINES_ARRAY
+          }//END-IF_STOP_LINES
         }
       }
     }
   }
 
+  /**
+   * Loads bus stops from a GTFS file.
+   */
+  @SuppressWarnings("unchecked")
   public void loadStopsFromGtfs() {
     BufferedReader br = null;
     String line = "";
