@@ -242,7 +242,6 @@ public class SPTransParser extends AbstractParser {
                     e.printStackTrace();
                   }
                 }
-                
                 String difference = String.valueOf((frcTime.getTime() - updTime.getTime())/60000);
                 System.out.println("Time to arrival: " + difference + " minutes.");
                 stopDesc.append(busLineJson.get("c")).append(ParserConstants.INFO_SEP);
@@ -251,10 +250,11 @@ public class SPTransParser extends AbstractParser {
                 stopDesc.append(difference);
                 //pObjs.put(tmpObj.get("CodigoParada").toString(), tmpObj);
                 //eKeeper.save(pObjs, pStopsForecastSchemaName, pStopsForecastTypeName);
-                // 4. Create PersistentEntity objects to export
-                //this.pEntities.add(olhoVivoJsonToPersistentEntity(tmpObj));
               }//END-FOR_LINES_ARRAY
-              System.out.println(olhoVivoForecastToPE(stopName, stopDesc.toString(), stopLng, stopLat, stopAddress));
+              // 4. Create PersistentEntity objects to export
+              PersistentEntity pEnt = olhoVivoForecastToPE(stopName, stopDesc.toString(), stopLng, stopLat, stopAddress);
+              this.pEntities.add(pEnt);
+              System.out.println(pEnt.toJson());
             }//END-IF_LINES_ARRAY
           }//END-IF_STOP_LINES
         }
