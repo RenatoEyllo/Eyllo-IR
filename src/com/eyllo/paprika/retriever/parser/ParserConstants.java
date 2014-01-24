@@ -48,4 +48,10 @@ public class ParserConstants {
 
   /** Default value to be used as server politeness between requests. */
   public static final int DEFAULT_REQ_POLITENESS = 5000;
+
+  /** Default maximum length value for a string. */
+  public static final int DEFAULT_STRING_MAX_LENGTH = 37;
+
+  /** Default characters for ending a long string. */
+  public static final String DEFAULT_STRING_FINAL_CHARS = "...";
 }

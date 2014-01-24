@@ -1,5 +1,8 @@
 package com.eyllo.paprika.retriever.parser;
 
+import static com.eyllo.paprika.retriever.parser.ParserConstants.DEFAULT_STRING_MAX_LENGTH;
+import static com.eyllo.paprika.retriever.parser.ParserConstants.DEFAULT_STRING_FINAL_CHARS;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -179,40 +182,6 @@ public class SPTransParser extends AbstractParser {
     parseStopsForecastFromStops ();
   }
 
-  /**
-   * Retrieves and parses bus arrivals using bus line's codes.
-   */
-  public void parseStopsForecastFromLines() {
-    if (useLocal()) {
-      // 1. Get all data from the keeper
-      //TODO this should come according the isGetLocal parameter as well
-     /* List busLines = eKeeper.retrieve(pLinesSchemaName, pLinesTypeName);
-     // 2. For each JSON object from the keeper, perform a request.
-      for(Object busLine : busLines) {
-        String lineCode = ((SearchHit)busLine).getSource().get("CodigoLinha").toString();
-        String url = OV_DEFAULT_API_URL + OV_API_STOPS_FORECAST_LINE_SEARCH + lineCode;
-        Map<String, String> cookies = new HashMap<String, String> ();
-        cookies.put(OV_COOKIE_NAME, this.getAuthCookie());
-        Document doc = ParserUtils.connectCookiePostUrl(url, cookies);
-        TODO These elements should be parse correctly.
-         * if (doc != null) {
-          JSONArray jArray = (JSONArray)ParserUtils.getJsonObj(doc.text());
-          System.out.println(url + ": " + jArray.size());
-          Map<String, JSONObject> pObjs = new HashMap<String, JSONObject>();
-          for (Object jObj : jArray) {
-            // 3. Give new data to keeper
-            JSONObject tmpObj = (JSONObject)jObj;
-            tmpObj.put("CodigoLinha", lineCode);
-            pObjs.put(tmpObj.get("CodigoParada").toString(), tmpObj);
-            eKeeper.save(pObjs, pStopsForecastSchemaName, pStopsForecastTypeName);
-            // 4. Create PersistentEntity objects to export
-            this.pEntities.add(olhoVivoJsonToPersistentEntity(tmpObj));
-          }
-        }
-      }*/
-    }
-  }
-
   @SuppressWarnings({ "rawtypes", "unused" })
   public void parseStopsForecastFromStops() {
     if (useLocal()) {
@@ -226,7 +195,15 @@ public class SPTransParser extends AbstractParser {
       }
      // 2. For each JSON object from the keeper, perform a request.
       for(Object busLine : busStops) {
+        // Get bus stop information
         String stopCode = ((SearchHit)busLine).getSource().get("stop_id").toString();
+        String stopName = ((SearchHit)busLine).getSource().get("stop_name").toString();
+        String stopAddress = stopName + ((SearchHit)busLine).getSource().get("stop_desc").toString();
+        if (stopAddress.length() > DEFAULT_STRING_MAX_LENGTH)
+          stopAddress = stopAddress.substring(0, DEFAULT_STRING_MAX_LENGTH-3) + DEFAULT_STRING_FINAL_CHARS;
+        String stopLng = ((SearchHit)busLine).getSource().get("stop_lon").toString();
+        String stopLat = ((SearchHit)busLine).getSource().get("stop_lat").toString();
+        // Perform request
         String url = OV_DEFAULT_API_URL + OV_API_STOPS_FORECAST_SEARCH + stopCode ;
         Map<String, String> cookies = new HashMap<String, String> ();
         cookies.put(OV_COOKIE_NAME, this.getAuthCookie());
@@ -237,8 +214,11 @@ public class SPTransParser extends AbstractParser {
           JSONObject completeJsonObj = (JSONObject)ParserUtils.getJsonObj(doc.text());
           if (!completeJsonObj.get("p").toString().contains("null") &&
               !completeJsonObj.get("p").toString().isEmpty()) {
+
             JSONArray linesArray = (JSONArray) ((JSONObject)completeJsonObj.get("p")).get("l");
             System.out.println(url + ": " + linesArray.size());
+            StringBuilder stopDesc = new StringBuilder();
+
             if (linesArray != null && linesArray.size() > 0) {
               Map<String, JSONObject> pObjs = new HashMap<String, JSONObject>();
               for (Object busLineGotten : linesArray) {
@@ -262,13 +242,19 @@ public class SPTransParser extends AbstractParser {
                     e.printStackTrace();
                   }
                 }
-                long difference = frcTime.getTime() - updTime.getTime();
-                System.out.println("Time to arrival: " + difference/1000/60 + " minutes.");
+                
+                String difference = String.valueOf((frcTime.getTime() - updTime.getTime())/60000);
+                System.out.println("Time to arrival: " + difference + " minutes.");
+                stopDesc.append(busLineJson.get("c")).append(ParserConstants.INFO_SEP);
+                stopDesc.append(busLineJson.get("lt0")).append(ParserConstants.DESC_SEP).append(busLineJson.get("lt1"));
+                stopDesc.append(ParserConstants.INFO_SEP);
+                stopDesc.append(difference);
                 //pObjs.put(tmpObj.get("CodigoParada").toString(), tmpObj);
                 //eKeeper.save(pObjs, pStopsForecastSchemaName, pStopsForecastTypeName);
                 // 4. Create PersistentEntity objects to export
                 //this.pEntities.add(olhoVivoJsonToPersistentEntity(tmpObj));
               }//END-FOR_LINES_ARRAY
+              System.out.println(olhoVivoForecastToPE(stopName, stopDesc.toString(), stopLng, stopLat, stopAddress));
             }//END-IF_LINES_ARRAY
           }//END-IF_STOP_LINES
         }
@@ -326,7 +312,7 @@ public class SPTransParser extends AbstractParser {
     if (useLocal()) {
       // 1. Get all data from the keeper
       //TODO this should come according the isGetLocal parameter as well
-      List busLines = eKeeper.retrieve(pLinesSchemaName, pLinesTypeName);
+      List<?> busLines = eKeeper.retrieve(pLinesSchemaName, pLinesTypeName);
      // 2. For each JSON object from the keeper, perform a request.
       for(Object busLine : busLines) {
         String lineCode = ((SearchHit)busLine).getSource().get("CodigoLinha").toString();
@@ -359,22 +345,48 @@ public class SPTransParser extends AbstractParser {
   }
 
   /**
+   * Retrieves and parses bus arrivals using bus line's codes.
+   */
+  public void parseStopsForecastFromLines() {
+    //TODO this should come according the isGetLocal parameter as well
+    if (useLocal()) {
+      // 1. Get all data from the keeper
+      List<?> busLines = eKeeper.retrieve(pLinesSchemaName, pLinesTypeName);
+     // 2. For each JSON object from the keeper, perform a request.
+      for(Object busLine : busLines) {
+        String lineCode = ((SearchHit)busLine).getSource().get("CodigoLinha").toString();
+        String url = OV_DEFAULT_API_URL + OV_API_STOPS_FORECAST_LINE_SEARCH + lineCode;
+        Map<String, String> cookies = new HashMap<String, String> ();
+        cookies.put(OV_COOKIE_NAME, this.getAuthCookie());
+        Document doc = ParserUtils.connectCookiePostUrl(url, cookies);
+        //TODO These elements should be parse correctly.
+        System.out.println(doc.text());
+      }
+    }
+  }
+
+  /**
    * Gets saved stops as a List of PersistentEntity.
    * @return List containing all PersistentEntity representing stops.
    */
   public List<PersistentEntity> getSavedStops() {
     getLogger().info("Setting entities from saved information.");
-    List lineStops = eKeeper.retrieve(pStopsSchemaName, pStopsTypeName);
+    List<?> lineStops = eKeeper.retrieve(pStopsSchemaName, pStopsTypeName);
     // Keeping retrieved entities in-memory to be saved by Retriever
     getLogger().info("Deleting in-memory stored entities.");
     List<PersistentEntity> stopsList = new ArrayList<PersistentEntity>();
     for(Object lineStop : lineStops) {
       JSONObject tmpObj = ParserUtils.getJsonObj(((SearchHit)lineStop).sourceAsMap());
       System.out.println(tmpObj);
-      stopsList.add(olhoVivoJsonToPersistentEntity(tmpObj));
+      stopsList.add(olhoVivoJsonToPE(tmpObj));
     }
     return stopsList;
   }
+
+  /**
+   * Gets a cookie after authenticating.
+   * @return
+   */
   private String getCookieSpAuthenticate() {
     String authUrl = OV_DEFAULT_API_URL + OV_API_AUTH + OV_DEFAULT_API_TOKEN;
     String cookieVal = ParserUtils.getCookie(authUrl, OV_COOKIE_NAME);
@@ -382,11 +394,31 @@ public class SPTransParser extends AbstractParser {
   }
 
   /**
+   * Converts a list of parameters into a PersistentEntity
+   * @param params
+   * @return
+   */
+  private PersistentEntity olhoVivoForecastToPE(String...params) {
+    PersistentEntity pEntity = new PersistentEntity();
+    pEntity.addToScenarioId(SCENARIO_ID);
+    pEntity.setHomepage(new Utf8(HOME_PAGE));
+    pEntity.setName(new Utf8(params[0]));
+    pEntity.setDescription(new Utf8(params[1]));
+    PersistentPoint pPoint = new PersistentPoint();
+    pPoint.addToCoordinates(Double.parseDouble(params[2]));
+    pPoint.addToCoordinates(Double.parseDouble(params[3]));
+    pPoint.setAddress(new Utf8(params[4]));
+    pPoint.setAccuracy(EylloLocation.GEOCODER_VERIF_ACC_HIGH);
+    pEntity.setPersistentpoint(pPoint);
+    return pEntity;
+  }
+
+  /**
    * Transforms a JSON string from OlhoVivo API into a PersistentEntity
    * @param pJSONObject from OlhoVivo API.
    * @return PersistentEntity from JSON object.
    */
-  private PersistentEntity olhoVivoJsonToPersistentEntity(JSONObject pJSONObject) {
+  private PersistentEntity olhoVivoJsonToPE(JSONObject pJSONObject) {
     PersistentEntity pEntity = new PersistentEntity();
     pEntity.addToScenarioId(SCENARIO_ID);
     pEntity.setHomepage(new Utf8(HOME_PAGE));
