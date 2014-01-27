@@ -58,7 +58,9 @@ public class EntityRetriever {
   public void startRetriever(Properties pParserProperties) throws InterruptedException {
     setUpRetrieverProps(pParserProperties);
     // Keeper in charge to storing results for each parser run
-    EntityKeeper entKeeper = new EntityKeeper(this.backendEntities, pParserProperties.getProperty(RetrieverConstants.RPARSER_OUTPATH));
+    EntityKeeper entKeeper = new EntityKeeper(this.backendEntities,
+        pParserProperties.getProperty(RetrieverConstants.RPARSER_OUTPATH),
+        pParserProperties.getProperty(RetrieverConstants.RET_BACKEND_SRVR_PORT));
     while (this.numRuns > 0) {
       entKeeper.saveEntities(parser.fetchEntities());
       waitPolitely(this.timeInterleaved);
@@ -85,7 +87,7 @@ public class EntityRetriever {
    */
   public void setUpRetrieverProps(Properties pRetrieverProps) {
     String tmpValue = pRetrieverProps.getProperty(RetrieverConstants.RET_BACKEND_ENTITIES);
-    backendEntities = (tmpValue == null|| tmpValue.isEmpty())?RetrieverConstants.DEFAULT_BACKENDENT:tmpValue;
+    backendEntities = (tmpValue == null|| tmpValue.isEmpty())?RetrieverConstants.RET_DEF_BACKEND_ENT:tmpValue;
     tmpValue = pRetrieverProps.getProperty(RetrieverConstants.RET_RUNS_NUM);
     numRuns = (tmpValue == null|| tmpValue.isEmpty())?RetrieverConstants.DEFAULT_NUM_RUNS:Integer.parseInt(tmpValue);
     tmpValue = pRetrieverProps.getProperty(RetrieverConstants.RET_RUNS_INTERLEAVE);

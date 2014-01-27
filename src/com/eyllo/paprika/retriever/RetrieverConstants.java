@@ -18,14 +18,20 @@ public class RetrieverConstants {
   public static String RET_RUNS_NUM = "retriever.runs.number";
   /** Time between retriever runs (seconds). */
   public static String RET_RUNS_INTERLEAVE = "retriever.runs.interleave";
-  /** Helps us decide where to store retrieved entities. */
-  public static String RET_BACKEND_ENTITIES = "retriever.backend.entities";
-  /** Default backend used for storing entities. */
-  public static String DEFAULT_BACKENDENT = "file";
   /** Default number of runs that Retriever will do.*/
   public static int DEFAULT_NUM_RUNS = 1;
   /** Default time interleaved between runs. */
   public static int DEFAULT_TIME_INTERLEAVED;
+
+  /* Properties for Retriever backend. */
+  /** Helps us decide where to store retrieved entities. */
+  public static String RET_BACKEND_ENTITIES = "retriever.backend.entities";
+  /** Backend server address. */
+  public static String RET_BACKEND_SRVR_ADD = "retriever.backend.server";
+  /** Backend server address port. */
+  public static String RET_BACKEND_SRVR_PORT = "retriever.backend.port";
+  /** Default backend used for storing entities. */
+  public static String RET_DEF_BACKEND_ENT = "file";
 
   /* Properties for Parser. */
   public static String RPARSER_NAME = "retriever.parser.name";

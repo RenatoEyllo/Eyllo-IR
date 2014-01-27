@@ -25,6 +25,8 @@ public abstract class AbstractDataLayer<K, V> {
       constructed = new IndexLayer(pDataLayerType);
     if (pDataLayerType[0].equals("file"))
       constructed = new FileLayer(pDataLayerType);
+    if (pDataLayerType[0].equals("mongo"))
+      constructed = new MongoLayer(pDataLayerType);
    return constructed;
   }
 
