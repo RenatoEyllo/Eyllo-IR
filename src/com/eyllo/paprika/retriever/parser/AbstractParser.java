@@ -3,8 +3,8 @@
  */
 package com.eyllo.paprika.retriever.parser;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ public abstract class AbstractParser {
   private String outPath;
 
   /** List of entities to be filled up. */
-  protected List<PersistentEntity> pEntities;
+  protected Map<Object, PersistentEntity> pEntities;
 
   /** URL where to start fetching data */
   private String fetchUrl;
@@ -117,7 +117,7 @@ public abstract class AbstractParser {
   public void initialize(int pMaxPageNumber, int pMaxNumEntities,
       String pOutPath, String pFetchUrl,
       boolean pUseLocal, int pPoliteness) {
-    pEntities = new ArrayList<PersistentEntity> ();
+    pEntities = new HashMap<Object, PersistentEntity> ();
     maxPageNumber = pMaxPageNumber;
     maxNumEntities = pMaxNumEntities;
     outPath = pOutPath;
@@ -131,7 +131,7 @@ public abstract class AbstractParser {
    * Gets entities from an specific URL
    * @return
    */
-  public List<PersistentEntity> fetchEntities(){
+  public Map<Object, PersistentEntity> fetchEntities(){
       int iCnt = 0;
       while ( iCnt < this.getMaxPageNumber()){
         getLogger().debug("Getting: "+ fetchUrl.replace(ParserConstants.PARAM_NUM, String.valueOf(iCnt)));
@@ -148,7 +148,7 @@ public abstract class AbstractParser {
    * Gets entities kept in memory after process.
    * @return
    */
-  public List<PersistentEntity> getEntities(){
+  public Map<Object, PersistentEntity> getEntities(){
     return this.pEntities;
   }
 
@@ -164,7 +164,7 @@ public abstract class AbstractParser {
   public void completeEntityInfo() {
     LOGGER.info("Completing information");
     if (this.pEntities != null & this.pEntities.size() >0)
-      for (PersistentEntity ent : this.pEntities){
+      for (PersistentEntity ent : this.pEntities.values()){
         this.parseIndividualEnt(ent);
       }
     else

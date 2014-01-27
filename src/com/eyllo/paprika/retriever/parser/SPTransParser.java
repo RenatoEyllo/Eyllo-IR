@@ -1,8 +1,5 @@
 package com.eyllo.paprika.retriever.parser;
 
-import static com.eyllo.paprika.retriever.parser.ParserConstants.DEFAULT_STRING_MAX_LENGTH;
-import static com.eyllo.paprika.retriever.parser.ParserConstants.DEFAULT_STRING_FINAL_CHARS;
-
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -56,7 +53,7 @@ public class SPTransParser extends AbstractParser {
   private static final String OV_COOKIE_NAME = "apiCredentials";
   //TODO this parameter should be passed, not HARDCODED!!!!
   /** Stops file Path. */
-  private static String stopFilePath = "/home/renato/workspace/Eyllo-IR/res/stops.txt";
+  private static String stopFilePath = "/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/res/stops.txt";
 
   /** Authentication cookie used inside the API. */
   private String authCookie;
@@ -124,7 +121,7 @@ public class SPTransParser extends AbstractParser {
    * @return
    */
   @Override
-  public List<PersistentEntity> fetchEntities(){
+  public Map<Object, PersistentEntity> fetchEntities(){
       int iCnt = 0;
       if (!this.getAuthCookie().equals("")) {
         // here we will take each bus line as being a pageNumber
@@ -194,13 +191,19 @@ public class SPTransParser extends AbstractParser {
         busStops = eKeeper.retrieve(pStopsSchemaName, pStopsTypeName);
       }
      // 2. For each JSON object from the keeper, perform a request.
+      int contBusLines = 0;
       for(Object busLine : busStops) {
+        if (contBusLines > 0)
+          break;
+        
         // Get bus stop information
         String stopCode = ((SearchHit)busLine).getSource().get("stop_id").toString();
         String stopName = ((SearchHit)busLine).getSource().get("stop_name").toString();
-        String stopAddress = stopName + ((SearchHit)busLine).getSource().get("stop_desc").toString();
-        if (stopAddress.length() > DEFAULT_STRING_MAX_LENGTH)
-          stopAddress = stopAddress.substring(0, DEFAULT_STRING_MAX_LENGTH-3) + DEFAULT_STRING_FINAL_CHARS;
+        String stopAddress = ((SearchHit)busLine).getSource().get("stop_desc").toString();
+        //if (stopAddress.length() > DEFAULT_STRING_MAX_LENGTH)
+        //  stopAddress = stopAddress.substring(0, DEFAULT_STRING_MAX_LENGTH-3) + DEFAULT_STRING_FINAL_CHARS;
+        if (stopAddress.isEmpty())
+          stopAddress = stopName;
         String stopLng = ((SearchHit)busLine).getSource().get("stop_lon").toString();
         String stopLat = ((SearchHit)busLine).getSource().get("stop_lat").toString();
         // Perform request
@@ -212,7 +215,7 @@ public class SPTransParser extends AbstractParser {
         /*TODO These elements should be parse correctly. **/
         if (doc != null && !doc.text().equals("")) {
           JSONObject completeJsonObj = (JSONObject)ParserUtils.getJsonObj(doc.text());
-          if (!completeJsonObj.get("p").toString().contains("null") &&
+          if (completeJsonObj.get("p") != null &&
               !completeJsonObj.get("p").toString().isEmpty()) {
 
             JSONArray linesArray = (JSONArray) ((JSONObject)completeJsonObj.get("p")).get("l");
@@ -244,17 +247,26 @@ public class SPTransParser extends AbstractParser {
                 }
                 String difference = String.valueOf((frcTime.getTime() - updTime.getTime())/60000);
                 System.out.println("Time to arrival: " + difference + " minutes.");
+                if (!stopDesc.toString().isEmpty())
+                  stopDesc.append("<br>");
                 stopDesc.append(busLineJson.get("c")).append(ParserConstants.INFO_SEP);
                 stopDesc.append(busLineJson.get("lt0")).append(ParserConstants.DESC_SEP).append(busLineJson.get("lt1"));
                 stopDesc.append(ParserConstants.INFO_SEP);
-                stopDesc.append(difference);
+                stopDesc.append(difference + " mins.");
                 //pObjs.put(tmpObj.get("CodigoParada").toString(), tmpObj);
                 //eKeeper.save(pObjs, pStopsForecastSchemaName, pStopsForecastTypeName);
               }//END-FOR_LINES_ARRAY
               // 4. Create PersistentEntity objects to export
               PersistentEntity pEnt = olhoVivoForecastToPE(stopName, stopDesc.toString(), stopLng, stopLat, stopAddress);
-              this.pEntities.add(pEnt);
+              this.pEntities.put(stopCode, pEnt);
               System.out.println(pEnt.toJson());
+              // Storing the bus stops into the indexLayer along with the persistent layer
+              Map<String, Object> busStopForecast = new HashMap<String, Object>();
+              busStopForecast.put(stopCode, ParserUtils.getJsonObj(pEnt.toJson()));
+              if (!busStopForecast.isEmpty()) {
+                eKeeper.save(busStopForecast, pStopsForecastSchemaName, pStopsForecastTypeName);
+                contBusLines ++;
+              }
             }//END-IF_LINES_ARRAY
           }//END-IF_STOP_LINES
         }
@@ -269,7 +281,7 @@ public class SPTransParser extends AbstractParser {
   public void loadStopsFromGtfs() {
     BufferedReader br = null;
     String line = "";
-    String cvsSplitBy = ",";
+    String cvsSplitBy = "\t";
     try {
       br = new BufferedReader(new FileReader(stopFilePath));
       // Ignore file header.

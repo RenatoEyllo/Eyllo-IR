@@ -433,9 +433,9 @@ public class PersistentEntity extends PersistentBase {
       jsonMap.put("userId", pUserId);
       jsonMap.put("title", this.getName()!=null?this.getName().toString():"");
       // extra info
-      for (Utf8 eInfo : this.getExtraInfo())
-        strBuilder.append(eInfo.toString()).append(ParserConstants.INFO_SEP);
-      jsonMap.put("text", strBuilder.toString());
+      //for (Utf8 eInfo : this.getExtraInfo())
+      //  strBuilder.append(eInfo.toString()).append(ParserConstants.INFO_SEP);
+      //jsonMap.put("text", strBuilder.toString());
       //location
       Map infoBox = new HashMap();
       Map geoJson = new HashMap();
@@ -446,11 +446,14 @@ public class PersistentEntity extends PersistentBase {
         geoJson.put("coordinates", entLoc.getCoordinates());
         geoJson.put("accuracy", entLoc.getAccuracy());
         //jsonMap.put("location", entLoc.getAttribMap());
+        //String infoBoxStr = entLoc.getAddress()==null?"":entLoc.getAddress().toString();
+        // TODO for the addresses inside SaoPaulo Transportes we don't need this
         String infoBoxStr = this.getDescription()==null?"":this.getDescription().toString();
-        infoBoxStr = infoBoxStr + entLoc.getAddress()==null?"":entLoc.getAddress().toString();
         infoBox.put("text", infoBoxStr);
       ///}
-      jsonMap.put("text", infoBoxStr);
+      //jsonMap.put("text", infoBoxStr);
+        String addressPoint = entLoc.getAddress()==null?"":entLoc.getAddress().toString();
+        jsonMap.put("text", addressPoint);
       jsonMap.put("type", "text");
       //infobox
       infoBox.put(EntityUtils.HOME_PAGE, this.getHomepage()!=null?this.getHomepage().toString():"");

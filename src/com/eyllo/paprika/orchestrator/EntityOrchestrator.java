@@ -27,7 +27,7 @@ public class EntityOrchestrator {
     EntityRetriever entRet = new EntityRetriever();
 
     try {
-      entRet.startRetriever(RetrieverUtils.getPropertiesFile("/home/renato/workspace/Eyllo-IR/conf/retriever.properties"));
+      entRet.startRetriever(RetrieverUtils.getPropertiesFile("/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/conf/retriever.properties"));
     } catch (InterruptedException e) {
       getLogger().error("Eror while running Retriever using properties.");
       e.printStackTrace();

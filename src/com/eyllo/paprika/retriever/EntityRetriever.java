@@ -58,12 +58,24 @@ public class EntityRetriever {
   public void startRetriever(Properties pParserProperties) throws InterruptedException {
     setUpRetrieverProps(pParserProperties);
     // Keeper in charge to storing results for each parser run
-    EntityKeeper entKeeper = new EntityKeeper(this.backendEntities);
+    EntityKeeper entKeeper = new EntityKeeper(this.backendEntities, pParserProperties.getProperty(RetrieverConstants.RPARSER_OUTPATH));
     while (this.numRuns > 0) {
       entKeeper.saveEntities(parser.fetchEntities());
-      this.wait(this.timeInterleaved);
+      waitPolitely(this.timeInterleaved);
       System.out.println(parser.getParserName());
       this.numRuns --;
+    }
+  }
+
+  /**
+   * Waits politely for n mili seconds.
+   */
+  public synchronized void waitPolitely(long pTimeInterleaved) {
+    try {
+      wait(pTimeInterleaved);
+    } catch (InterruptedException e) {
+      getLogger().error("Error while waiting to perform a new server request.");
+      e.printStackTrace();
     }
   }
 

@@ -27,7 +27,7 @@ public class EntityKeeper {
    */
   private List<PersistentEntity> entities;
 
-  public EntityKeeper (String pDataLayerType) {
+  public EntityKeeper (String...pDataLayerType) {
     // call dataLayer factory to initialize
     dataLayer = AbstractDataLayer.dataLayerFactory(pDataLayerType);
   }
@@ -124,9 +124,10 @@ public class EntityKeeper {
       LOGGER.info("All entities were NOT persisted and retrieved successfully");
   }
 
-    public void saveEntities(List<PersistentEntity> fetchEntities) {
+  //TODO this method should be the same as the other saveEntities
+    public void saveEntities(Map<Object, PersistentEntity> fetchEntities) {
       // TODO Auto-generated method stub
-      //dataLayer.s
+      dataLayer.saveElements(fetchEntities);
     }
 
 }

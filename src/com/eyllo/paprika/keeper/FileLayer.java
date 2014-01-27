@@ -6,14 +6,28 @@ package com.eyllo.paprika.keeper;
 import java.util.List;
 import java.util.Map;
 
+import com.eyllo.paprika.retriever.parser.ParserUtils;
+import com.eyllo.paprika.retriever.parser.elements.PersistentEntity;
+
 /**
  * @author renato
  *
  */
 public class FileLayer extends AbstractDataLayer {
 
+  /**
+   * File path where data is going to be read and written.
+   */
+  private String filePath;
+
+  public FileLayer(String...pDataLayerParams) {
+    initializeDataLayer(pDataLayerParams);
+  }
+
   @Override
-  public void initializeDataLayer() {
+  public void initializeDataLayer(String...pInitParams) {
+    if (pInitParams != null && pInitParams.length > 1)
+      this.setFilePath(pInitParams[1]);
   }
 
   @Override
@@ -41,7 +55,14 @@ public class FileLayer extends AbstractDataLayer {
    */
   @Override
   public boolean saveElements(Map pElems, String... params) {
-    return false;
+    ParserUtils.writeJsonFile((List<PersistentEntity>) pElems.values(), getFilePath());
+    return true;
   }
 
+  public String getFilePath() {
+    return filePath;
+  }
+  public void setFilePath(String pFilePath) {
+    filePath = pFilePath;
+  }
 }

@@ -58,7 +58,7 @@ public class IndexLayer<K, V> extends AbstractDataLayer<K, V> {
    */
   private Client elSearchClient;
   
-  public IndexLayer() {
+  public IndexLayer(String...pDataLayerParams) {
     super();
     getLogger().info("Initializing IndexLayer for data persistency.");
     this.initializeDataLayer();
@@ -68,7 +68,7 @@ public class IndexLayer<K, V> extends AbstractDataLayer<K, V> {
   /**
    * Initializes the transport client for ElasticSearch.
    */
-  public void initializeDataLayer() {
+  public void initializeDataLayer(String...pInitParams) {
     if (elSearchClient == null) {
       Settings settings = ImmutableSettings.settingsBuilder()
           .put("cluster.name", CLUSTER_NAME).build();

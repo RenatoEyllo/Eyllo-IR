@@ -19,19 +19,19 @@ public abstract class AbstractDataLayer<K, V> {
   }
 
   @SuppressWarnings("rawtypes")
-  public static AbstractDataLayer dataLayerFactory(String pDataLayerType) {
+  public static AbstractDataLayer dataLayerFactory(String...pDataLayerType) {
     AbstractDataLayer constructed = null;
-    if (pDataLayerType.equals("index"))
-      constructed = new IndexLayer();
-    if (pDataLayerType.equals("file"))
-      constructed = new FileLayer();
+    if (pDataLayerType[0].equals("index"))
+      constructed = new IndexLayer(pDataLayerType);
+    if (pDataLayerType[0].equals("file"))
+      constructed = new FileLayer(pDataLayerType);
    return constructed;
   }
 
   /**
    * Initializes a data layer.
    */
-  public abstract void initializeDataLayer();
+  public abstract void initializeDataLayer(String...pInitParams);
 
   /**
    * Puts a value identified by a key.
