@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 //import org.bingmaps.rest.models.Confidence;
 
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.avro.generic.GenericArray;
@@ -59,10 +60,12 @@ public class EntityRetriever {
     setUpRetrieverProps(pParserProperties);
     // Keeper in charge to storing results for each parser run
     EntityKeeper entKeeper = new EntityKeeper(this.backendEntities,
-        pParserProperties.getProperty(RetrieverConstants.RPARSER_OUTPATH),
+        pParserProperties.getProperty(RetrieverConstants.RET_BACKEND_SRVR_ADD),
         pParserProperties.getProperty(RetrieverConstants.RET_BACKEND_SRVR_PORT));
     while (this.numRuns > 0) {
-      entKeeper.saveEntities(parser.fetchEntities());
+      Map<Object, PersistentEntity> entMap = parser.fetchEntities();
+      entKeeper.deleteAll("paprika", "geoTags", "{\"scenarioId\":27}");
+      entKeeper.saveEntities(entMap);
       waitPolitely(this.timeInterleaved);
       System.out.println(parser.getParserName());
       this.numRuns --;

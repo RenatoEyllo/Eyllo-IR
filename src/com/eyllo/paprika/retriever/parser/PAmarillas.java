@@ -3,6 +3,7 @@
  */
 package com.eyllo.paprika.retriever.parser;
 
+import com.eyllo.paprika.retriever.RetrieverConstants;
 import com.eyllo.paprika.retriever.parser.elements.PersistentEntity;
 
 /**
@@ -19,18 +20,18 @@ public class PAmarillas extends AbstractParser {
   private static final String DEFAULT_PA_URL = "http://www.paginasamarillas.com.pe/";
 
   /** Parser name. */
-  private static final String name = "pamarillas";
+  private static final String NAME = "pamarillas";
 
   private static String places[] = {"restaurantes-+carnes+y+parrilladas"};//, "hoteles"};
 
   /** Default constructor. */
   public PAmarillas() {
-    super(name, DEFAULT_SEARCH_URL);
+    super(10000, 10000, NAME, DEFAULT_SEARCH_URL, true, 10000);
   }
 
   /** Constructor. */
   public PAmarillas(int pMaxPageNumber, int pMaxNumEntities) {
-    super(pMaxPageNumber, pMaxNumEntities,name, DEFAULT_SEARCH_URL);
+    super(pMaxPageNumber, pMaxNumEntities, NAME, DEFAULT_SEARCH_URL, true, 10000);
   }
 
   @Override

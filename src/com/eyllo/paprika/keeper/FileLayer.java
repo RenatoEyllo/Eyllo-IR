@@ -65,4 +65,11 @@ public class FileLayer extends AbstractDataLayer {
   public void setFilePath(String pFilePath) {
     filePath = pFilePath;
   }
+
+  @Override
+  public void deleteAll(String pSchemaName, String pColName,
+      String... pExtraParams) {
+    // TODO Auto-generated method stub
+    
+  }
 }

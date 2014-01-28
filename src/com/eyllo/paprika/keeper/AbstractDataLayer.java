@@ -74,4 +74,7 @@ public abstract class AbstractDataLayer<K, V> {
    */
   public abstract List<V> scan(String pIndexName, String pAttrName, String...pExtra);
 
+  public abstract void deleteAll(String pSchemaName, String pColName,
+      String...pExtraParams);
+
 }

@@ -26,23 +26,25 @@ public class RioShowParser extends AbstractParser {
 
   private static String DEFAULT_SEARCH_URL = "http://rioshow.oglobo.globo.com/gastronomia/home.aspx";
   private String entityType = "Restaurant";
+  /** Parser name. */
+  public static final String NAME = "rioshow";
 
   /**
    * Default constructor.
    */
   public RioShowParser() {
     super();
-    this.setName("rioshow");
+    this.setParserName(NAME);
     this.setScenarioId(11);
     this.setUserId(20);
-    this.setUrl(DEFAULT_SEARCH_URL);
+    this.setFetchUrl(DEFAULT_SEARCH_URL);
     setLogger(getClass());
   }
 
   @Override
-  public List<PersistentEntity> fetchEntities() {
-    Document doc = ParserUtils.connectGetUrl(ParserUtils.getUri(this.getUrl()).toASCIIString());
-    doc.setBaseUri(this.getUrl());
+  public Map<Object, PersistentEntity> fetchEntities() {
+    Document doc = ParserUtils.connectGetUrl(ParserUtils.getUri(this.getFetchUrl()).toASCIIString());
+    doc.setBaseUri(this.getFetchUrl());
   //  int cont = 0;
     // get initial list
     Elements elemsPosted = doc.select("div[class*=content]")
@@ -93,7 +95,7 @@ public class RioShowParser extends AbstractParser {
                 pEnt.setName(new Utf8(eyLink.getLinkText()));
                 pEnt.putToSameAs(new Utf8(eyLink.getLinkHref()), new Utf8(eyLink.getLinkText()));
                 //System.out.println(pEnt);
-                this.pEntities.add(pEnt);
+                this.pEntities.put(pEnt.getHomepage(), pEnt);
                 //break;
               }
             }// END-FOR INFOLINKS
@@ -116,8 +118,8 @@ public class RioShowParser extends AbstractParser {
   public static void main(String[] args) {
     RioShowParser rioSh = new RioShowParser();
     //rioSh.getEntities(DEFAULT_SEARCH_URL);
-    rioSh.setPath("/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/res/");
-    ParserUtils.writeJsonFile(rioSh.fetchEntities(), rioSh.getOutputFileName());
+    rioSh.setOutPath("/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/res/");
+    ParserUtils.writeJsonFile(((List<PersistentEntity>)rioSh.fetchEntities().values()), rioSh.getOutputFileName());
   }
 
   @Override

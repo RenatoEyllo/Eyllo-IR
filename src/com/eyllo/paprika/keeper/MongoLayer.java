@@ -1,17 +1,12 @@
-/**
- * 
- */
 package com.eyllo.paprika.keeper;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eyllo.paprika.retriever.parser.ParserUtils;
 import com.eyllo.paprika.retriever.parser.elements.PersistentEntity;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -51,20 +46,24 @@ public class MongoLayer extends AbstractDataLayer {
    */
   @Override
   public void initializeDataLayer(String... pInitParams) {
-    try {
-      MongoClientOptions ops = MongoClientOptions.builder().autoConnectRetry(true)
-      .maxWaitTime(fifteenMins)
-      .socketTimeout(0) //never times out
-      .connectTimeout(0) //never times out
-      .socketKeepAlive(true)
-      .maxConnectionIdleTime(fifteenMins)
-      .maxConnectionLifeTime(twentyMins)
-      .build();
-      setMongoClient(new MongoClient(strServer,ops));
-      setDbMap(new HashMap<String, DB>());
-    } catch (java.net.UnknownHostException e){
-      getLogger().error("Error connecting to Mongo Layer.", e.getMessage());
-      e.printStackTrace();
+    if (pInitParams.length > 0) {
+      strServer = pInitParams[1];
+      strPort = Integer.parseInt(pInitParams[2]);
+      try {
+        MongoClientOptions ops = MongoClientOptions.builder().autoConnectRetry(true)
+        .maxWaitTime(fifteenMins)
+        .socketTimeout(0) //never times out
+        .connectTimeout(0) //never times out
+        .socketKeepAlive(true)
+        .maxConnectionIdleTime(fifteenMins)
+        .maxConnectionLifeTime(twentyMins)
+        .build();
+        setMongoClient(new MongoClient(strServer,ops));
+        setDbMap(new HashMap<String, DB>());
+      } catch (java.net.UnknownHostException e){
+        getLogger().error("Error connecting to Mongo Layer.", e.getMessage());
+        e.printStackTrace();
+      }
     }
   }
 
@@ -94,13 +93,18 @@ public class MongoLayer extends AbstractDataLayer {
    */
   @Override
   public boolean saveElements(Map pElems, String... params) {
+    //TODO this should be passed as parameters
+    params = new String[2];
+    params[0] = "paprika";
+    params[1] = "geoTags";
     WriteResult result = null;
-    if (params != null && params.length > 2) {
-      DBCollection DBCollection = getCollection(params[1], params[2]);
+    if (params != null && params.length > 1) {
+      DBCollection collection = getCollection(params[0], params[1]);
       for (Object pEnt : pElems.values()) {
-        JSONObject teste = (JSONObject) ParserUtils.getJsonObj(((PersistentEntity) pEnt).toJson());
-        DBObject doc = (DBObject) teste;
-        result = DBCollection.save(doc);
+        //JSONObject teste = (JSONObject) ParserUtils.getJsonObj(((PersistentEntity) pEnt).toJson());
+        Object o = com.mongodb.util.JSON.parse(((PersistentEntity) pEnt).toJson());
+        DBObject doc = (DBObject) o;
+        result = collection.save(doc);
       }
     }
     if (result != null)
@@ -108,6 +112,13 @@ public class MongoLayer extends AbstractDataLayer {
     return false;
   }
 
+  @Override
+  public void deleteAll(String pSchemaName, String pColName, String...pExtraParams) {
+    DBCollection collection = getCollection(pSchemaName, pColName);
+    Object o = com.mongodb.util.JSON.parse(pExtraParams[0]);
+    DBObject doc = (DBObject) o;
+    WriteResult res = collection.remove(doc);
+  }
   /* (non-Javadoc)
    * @see com.eyllo.paprika.keeper.AbstractDataLayer#getDataLayer()
    */
@@ -225,5 +236,4 @@ public class MongoLayer extends AbstractDataLayer {
   public void setDbMap(HashMap<String, DB> dbMap) {
     this.dbMap = dbMap;
   }
-
 }

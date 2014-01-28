@@ -130,4 +130,9 @@ public class EntityKeeper {
       dataLayer.saveElements(fetchEntities);
     }
 
+    public void deleteAll(String pSchemaName, String pColName, String...pExtraParams) {
+      // TODO Auto-generated method stub
+      dataLayer.deleteAll(pSchemaName, pColName, pExtraParams);
+    }
+
 }

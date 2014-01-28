@@ -359,4 +359,11 @@ public class IndexLayer<K, V> extends AbstractDataLayer<K, V> {
   public static void setLogger(Logger lOGGER) {
     LOGGER = lOGGER;
   }
+
+  @Override
+  public void deleteAll(String pSchemaName, String pColName,
+      String... pExtraParams) {
+    // TODO Auto-generated method stub
+    
+  }
 }
