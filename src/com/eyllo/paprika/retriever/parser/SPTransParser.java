@@ -335,11 +335,13 @@ public class SPTransParser extends AbstractParser {
       int busCnt = 0;
      // 2. For each JSON object from the keeper, perform a request.
       for(Object busLine : busLines) {
+        // TODO if a bus line already exists locally then we shouldn't do a request
         String lineCode = ((SearchHit)busLine).getSource().get("CodigoLinha").toString();
         String url = OV_DEFAULT_API_URL + OV_API_STOPS_SEARCH + lineCode;
         Map<String, String> cookies = new HashMap<String, String> ();
         cookies.put(OV_COOKIE_NAME, this.getAuthCookie());
         Document doc = ParserUtils.connectCookiePostUrl(url, cookies);
+        /////
         if (doc != null) {
           JSONArray jArray = (JSONArray)ParserUtils.getJsonObj(doc.text());
           getLogger().info("Stops for: " +url + " Total:" + jArray.size() + " stops.");
