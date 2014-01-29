@@ -25,9 +25,9 @@ public class EntityOrchestrator {
     // 1. Retrieve entities
     //AbstractParser absParser = null; //new SPTransParser(100, 100, true);
     EntityRetriever entRet = new EntityRetriever();
-
+    //"/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/conf/retriever.properties"
     try {
-      entRet.startRetriever(RetrieverUtils.getPropertiesFile("/Users/renatomarroquin/Documents/workspace/workspaceEyllo/Eyllo-IR/conf/retriever.properties"));
+      entRet.startRetriever(RetrieverUtils.getPropertiesFile(args[0]));
     } catch (InterruptedException e) {
       getLogger().error("Eror while running Retriever using properties.");
       e.printStackTrace();

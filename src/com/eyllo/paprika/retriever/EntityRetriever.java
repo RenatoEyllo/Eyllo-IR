@@ -63,6 +63,9 @@ public class EntityRetriever {
         pParserProperties.getProperty(RetrieverConstants.RET_BACKEND_SRVR_ADD),
         pParserProperties.getProperty(RetrieverConstants.RET_BACKEND_SRVR_PORT));
     while (this.numRuns > 0) {
+      getLogger().info("===========================");
+      getLogger().info("A new run is starting . . .");
+      getLogger().info("===========================");
       Map<Object, PersistentEntity> entMap = parser.fetchEntities();
       entKeeper.deleteAll("paprika", "geoTags", "{\"scenarioId\":27}");
       entKeeper.saveEntities(entMap);

@@ -154,7 +154,7 @@ public class SPTransParser extends AbstractParser {
       for (Object jObj : jArray) {
         JSONObject tmpObj = (JSONObject)jObj;
         pObjs.put(tmpObj.get("CodigoLinha").toString(), tmpObj);
-        System.out.println(jObj);
+        //System.out.println(jObj);
       }
       // This needs to be done within local storage as a different request is needed
       if (!pObjs.isEmpty())
@@ -175,7 +175,7 @@ public class SPTransParser extends AbstractParser {
    */
   @Override
   public void parseIndividualEnt(PersistentEntity pEntity) {
-    //parseStopsFromLines ();
+    parseStopsFromLines ();
     parseStopsForecastFromStops ();
   }
 
@@ -191,11 +191,10 @@ public class SPTransParser extends AbstractParser {
         busStops = eKeeper.retrieve(pStopsSchemaName, pStopsTypeName);
       }
      // 2. For each JSON object from the keeper, perform a request.
-      int contBusLines = 0;
+//      int contBusLines = 0;
       for(Object busLine : busStops) {
-        if (contBusLines > 0)
-          break;
-        
+  //      if (contBusLines > 0)
+    //      break;
         // Get bus stop information
         String stopCode = ((SearchHit)busLine).getSource().get("stop_id").toString();
         String stopName = ((SearchHit)busLine).getSource().get("stop_name").toString();
@@ -211,7 +210,7 @@ public class SPTransParser extends AbstractParser {
         Map<String, String> cookies = new HashMap<String, String> ();
         cookies.put(OV_COOKIE_NAME, this.getAuthCookie());
         Document doc = ParserUtils.connectCookiePostUrl(url, cookies);
-        System.out.println(doc.text());
+        //System.out.println(doc.text());
         /*TODO These elements should be parse correctly. **/
         if (doc != null && !doc.text().equals("")) {
           JSONObject completeJsonObj = (JSONObject)ParserUtils.getJsonObj(doc.text());
@@ -219,26 +218,27 @@ public class SPTransParser extends AbstractParser {
               !completeJsonObj.get("p").toString().isEmpty()) {
 
             JSONArray linesArray = (JSONArray) ((JSONObject)completeJsonObj.get("p")).get("l");
-            System.out.println(url + ": " + linesArray.size());
+            //System.out.println(url + ": " + linesArray.size());
             StringBuilder stopDesc = new StringBuilder();
+            stopDesc.append("Atualizado: ").append(completeJsonObj.get("hr").toString()).append("<br>");
 
             if (linesArray != null && linesArray.size() > 0) {
               Map<String, JSONObject> pObjs = new HashMap<String, JSONObject>();
               for (Object busLineGotten : linesArray) {
                 JSONObject busLineJson = (JSONObject) busLineGotten;
                 // Bus line code
-                System.out.println(busLineJson.get("c"));
+                //System.out.println(busLineJson.get("c"));
                 // Bus sign
-                System.out.println(busLineJson.get("lt0") + " - " + busLineJson.get("lt1"));
+                //System.out.println(busLineJson.get("lt0") + " - " + busLineJson.get("lt1"));
                 // Bus arrival time
                 JSONArray busesArrivals = (JSONArray) busLineJson.get("vs");
                 // if there are any bus arrivals, then get the first one as it is the only one we care
                 if (busesArrivals.size() >0) {
                   JSONObject busArrival = (JSONObject)busesArrivals.get(0);
-                  System.out.println(busArrival.get("t"));
+                  //System.out.println(busArrival.get("t"));
                   try {
                     updTime = inFormat.parse(completeJsonObj.get("hr").toString());
-                    System.out.println(updTime.toString());
+                  //  System.out.println(updTime.toString());
                     frcTime = inFormat.parse(busArrival.get("t").toString());
                   } catch (ParseException e) {
                     // TODO Auto-generated catch block
@@ -246,7 +246,7 @@ public class SPTransParser extends AbstractParser {
                   }
                 }
                 String difference = String.valueOf((frcTime.getTime() - updTime.getTime())/60000);
-                System.out.println("Time to arrival: " + difference + " minutes.");
+                //System.out.println("Time to arrival: " + difference + " minutes.");
                 if (!stopDesc.toString().isEmpty())
                   stopDesc.append("<br>");
                 stopDesc.append(busLineJson.get("c")).append(ParserConstants.INFO_SEP);
@@ -263,9 +263,10 @@ public class SPTransParser extends AbstractParser {
               // Storing the bus stops into the indexLayer along with the persistent layer
               Map<String, Object> busStopForecast = new HashMap<String, Object>();
               busStopForecast.put(stopCode, ParserUtils.getJsonObj(pEnt.toJson()));
+              //System.out.println(pEnt.toJson());
               if (!busStopForecast.isEmpty()) {
                 eKeeper.save(busStopForecast, pStopsForecastSchemaName, pStopsForecastTypeName);
-                contBusLines ++;
+        //        contBusLines ++;
               }
             }//END-IF_LINES_ARRAY
           }//END-IF_STOP_LINES
@@ -279,14 +280,17 @@ public class SPTransParser extends AbstractParser {
    */
   @SuppressWarnings("unchecked")
   public void loadStopsFromGtfs() {
+    getLogger().info("Loading stops from file.");
     BufferedReader br = null;
     String line = "";
     String cvsSplitBy = "\t";
     try {
       br = new BufferedReader(new FileReader(stopFilePath));
       // Ignore file header.
+      int cnt = 0;
       br.readLine();
       while ((line = br.readLine()) != null) {
+        cnt ++;
         // use comma as separator
         String[] lineParts = line.split(cvsSplitBy);
         //"stop_id","stop_name","stop_desc","stop_lat","stop_lon"
@@ -303,6 +307,7 @@ public class SPTransParser extends AbstractParser {
         if (!pObjs.isEmpty())
           eKeeper.save(pObjs, pStopsSchemaName, pStopsTypeName);
       }
+      getLogger().info("We loaded " + cnt + " stops.");
     } catch (FileNotFoundException e) {
       getLogger().error("Error trying to load Stops from GTFS file.");
       e.printStackTrace();
@@ -320,11 +325,14 @@ public class SPTransParser extends AbstractParser {
     }
   }
 
+  @SuppressWarnings("unchecked")
   public void parseStopsFromLines() {
     if (useLocal()) {
       // 1. Get all data from the keeper
       //TODO this should come according the isGetLocal parameter as well
       List<?> busLines = eKeeper.retrieve(pLinesSchemaName, pLinesTypeName);
+      getLogger().info("Checking stops for " + busLines.size() + " bus lines.");
+      int busCnt = 0;
      // 2. For each JSON object from the keeper, perform a request.
       for(Object busLine : busLines) {
         String lineCode = ((SearchHit)busLine).getSource().get("CodigoLinha").toString();
@@ -334,26 +342,33 @@ public class SPTransParser extends AbstractParser {
         Document doc = ParserUtils.connectCookiePostUrl(url, cookies);
         if (doc != null) {
           JSONArray jArray = (JSONArray)ParserUtils.getJsonObj(doc.text());
-          System.out.println(url + ": " + jArray.size());
+          getLogger().info("Stops for: " +url + " Total:" + jArray.size() + " stops.");
           Map<String, JSONObject> pObjs = new HashMap<String, JSONObject>();
           for (Object jObj : jArray) {
             // 3. Give new data to keeper
             JSONObject tmpObj = (JSONObject)jObj;
             tmpObj.put("CodigoLinha", lineCode);
-            pObjs.put(tmpObj.get("CodigoParada").toString(), tmpObj);
+            JSONObject stopJson = new JSONObject();
+            stopJson.put("stop_id", tmpObj.get("CodigoParada"));
+            stopJson.put("stop_name", tmpObj.get("Nome"));
+            stopJson.put("stop_desc", tmpObj.get("Endereco"));
+            stopJson.put("stop_lat", tmpObj.get("Latitude"));
+            stopJson.put("stop_lon", tmpObj.get("Longitude"));
+            pObjs.put(tmpObj.get("CodigoParada").toString(), stopJson);
+            busCnt ++;
+          }
+          if (!pObjs.isEmpty()) {
             eKeeper.save(pObjs, pStopsSchemaName, pStopsTypeName);
-            // 4. Create PersistentEntity objects to export
-            //this.pEntities.add(olhoVivoJsonToPersistentEntity(tmpObj));
+            pObjs.clear();
           }
         }
         this.waitPolitely();
       }
+      getLogger().info("There were " + busCnt + " bus stops.");
     } else {
       //TODO
       getLogger().warn("Behaviour for not using local mode hasn't been implemented yet.");
     }
-    //for (PersistentEntity pEnt : this.pEntities)
-    //  System.out.println(pEnt.toJson());
   }
 
   /**
@@ -451,7 +466,7 @@ public class SPTransParser extends AbstractParser {
    */
   private String[] getSearchCombinations() {
     String [] vowels = {"a", "e", "i", "o", "u"};
-    String [] consonants = {"s", "l", "p", "t", "c", "b", "d", "f"};
+    String [] consonants = {"s", "l", "p", "t", "c", "b", "d", "f", "g", "h", "j", "k", "m", "n", "r", "v", "z"};
     String [] sCombinations = new String[vowels.length * consonants.length + vowels.length + consonants.length];
     int cont = 0, cont2 = 0, contComb = vowels.length + consonants.length;
     System.arraycopy( vowels, 0, sCombinations, 0, vowels.length );
