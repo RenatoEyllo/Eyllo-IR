@@ -253,8 +253,8 @@ public class IndexLayer<K, V> extends AbstractDataLayer<K, V> {
       return FilterBuilders.geoDistanceFilter(pFieldName)
         .point(pLat, pLng)
         .distance(pDistance, UtilsStore.getDistanceUnit(pDistanceUnit))
-        .optimizeBbox(ConstantsStore.BOUNDING_BOX_MEMORY)                    // Can be also "indexed" or "none"
-        .geoDistance(ConstantsStore.DEFAULT_GEO_DIST);            // Or GeoDistance.PLANE
+        .optimizeBbox(KeeperProperties.BOUNDING_BOX_MEMORY)                    // Can be also "indexed" or "none"
+        .geoDistance(KeeperProperties.DEFAULT_GEO_DIST);            // Or GeoDistance.PLANE
   }
 
   public void search(String pIndexName){

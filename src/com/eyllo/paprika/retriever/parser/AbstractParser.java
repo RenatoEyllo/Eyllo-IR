@@ -12,6 +12,9 @@ import org.slf4j.LoggerFactory;
 import com.eyllo.paprika.retriever.parser.elements.PersistentEntity;
 
 /**
+ * Abstract class to be extended from other parser classes.
+ * Constructors should be implemented as needed for each specific parser.
+ * i.e. they might need less parameters if they have more default values.
  * @author renatomarroquin
  *
  */
@@ -35,6 +38,9 @@ public abstract class AbstractParser {
   /** URL where to start fetching data */
   private String fetchUrl;
 
+  /** Tokens for fetching data from a specific URL */
+  private String fetchUrlTokens;
+
   /** Maximum number of pages to be read. */
   private int maxPageNumber;
 
@@ -42,7 +48,7 @@ public abstract class AbstractParser {
   private int maxNumEntities;
 
   /** Default output file name */
-  private String outputName = ParserConstants.PARAM_ENT_NAME + ".json";
+  private String outputName = ParserProperties.PARAM_ENT_NAME + ".json";
 
   /** If the search process will involve local search. */
   private boolean useLocal;
@@ -68,13 +74,14 @@ public abstract class AbstractParser {
    * @param pName to identify parser.
    * @param pOutPath to export entities to JSON file.
    * @param pFetchUrl from where to extract entities.
+   * @param pFetchUrlTokens from where to extract entities.
    * @param pLocal Whether or not the search process will include local search.
    * @param pPoliteness  Time to wait between external request.
    */
   public AbstractParser(int pMaxPageNumber, int pMaxNumEntities,
-      String pFetchUrl, String pOutPath,
+      String pFetchUrl, String pFetchUrlTokens, String pOutPath,
       boolean pLocal, int pPoliteness) {
-    initialize(pMaxPageNumber, pMaxNumEntities, pOutPath, pFetchUrl, pLocal, pPoliteness);
+    initialize(pMaxPageNumber, pMaxNumEntities, pOutPath, pFetchUrl, pFetchUrlTokens, pLocal, pPoliteness);
   }
 
   /**
@@ -85,10 +92,10 @@ public abstract class AbstractParser {
    * @param pFetchUrl
    */
   public AbstractParser(int pMaxPageNumber, int pMaxNumEntities,
-      String pFetchUrl) {
+      String pFetchUrl, String pFetchUrlTokens) {
     initialize(pMaxPageNumber, pMaxNumEntities,
-        ParserConstants.DEFAULT_OUTPUT_PATH, pFetchUrl,
-        ParserConstants.DEFAULT_USE_LOCAL, ParserConstants.DEFAULT_REQ_POLITENESS);
+        ParserProperties.DEFAULT_OUTPUT_PATH, pFetchUrl, pFetchUrlTokens,
+        ParserProperties.DEFAULT_USE_LOCAL, ParserProperties.DEFAULT_REQ_POLITENESS);
   }
 
   /**
@@ -98,10 +105,10 @@ public abstract class AbstractParser {
    * @param pName   Parser name.
    * @param pFetchUrl   To get entities from.
    */
-  public AbstractParser(String pFetchUrl) {
+  public AbstractParser(String pFetchUrl, String pFetchUrlTokens) {
     initialize(Integer.MAX_VALUE, Integer.MAX_VALUE,
-        ParserConstants.DEFAULT_OUTPUT_PATH, pFetchUrl,
-        ParserConstants.DEFAULT_USE_LOCAL, ParserConstants.DEFAULT_REQ_POLITENESS);
+        ParserProperties.DEFAULT_OUTPUT_PATH, pFetchUrl, pFetchUrlTokens,
+        ParserProperties.DEFAULT_USE_LOCAL, ParserProperties.DEFAULT_REQ_POLITENESS);
   }
 
   /**
@@ -115,13 +122,14 @@ public abstract class AbstractParser {
    * @param pPoliteness Time to wait between external request.
    */
   public void initialize(int pMaxPageNumber, int pMaxNumEntities,
-      String pOutPath, String pFetchUrl,
+      String pOutPath, String pFetchUrl, String pFetchUrlTokens,
       boolean pUseLocal, int pPoliteness) {
     pEntities = new HashMap<Object, PersistentEntity> ();
     maxPageNumber = pMaxPageNumber;
     maxNumEntities = pMaxNumEntities;
     outPath = pOutPath;
     fetchUrl = pFetchUrl;
+    fetchUrlTokens = pFetchUrlTokens;
     setUseLocal(pUseLocal);
     setPoliteness(pPoliteness);
     
@@ -134,9 +142,9 @@ public abstract class AbstractParser {
   public Map<Object, PersistentEntity> fetchEntities(){
       int iCnt = 0;
       while ( iCnt < this.getMaxPageNumber()){
-        getLogger().debug("Getting: "+ fetchUrl.replace(ParserConstants.PARAM_NUM, String.valueOf(iCnt)));
+        getLogger().debug("Getting: "+ fetchUrl.replace(ParserProperties.PARAM_NUM, String.valueOf(iCnt)));
         waitPolitely();
-        this.parseSearchResults(fetchUrl.replace(ParserConstants.PARAM_NUM, String.valueOf(iCnt)));
+        this.parseSearchResults(fetchUrl.replace(ParserProperties.PARAM_NUM, String.valueOf(iCnt)));
         iCnt+=1;
       }
       getLogger().info("Hubo # entidades : " + this.totalEntities());
@@ -184,7 +192,7 @@ public abstract class AbstractParser {
    */
   public String getOutputFileName() {
     return this.outPath + this.outputName.replace(
-        ParserConstants.PARAM_ENT_NAME, getParserName());
+        ParserProperties.PARAM_ENT_NAME, getParserName());
   }
 
   /**
@@ -343,5 +351,19 @@ public abstract class AbstractParser {
 
   public void setParserName(String parserName) {
     this.parserName = parserName;
+  }
+
+  /**
+   * @return the fetchUrlTokens
+   */
+  public String getFetchUrlTokens() {
+    return fetchUrlTokens;
+  }
+
+  /**
+   * @param fetchUrlTokens the fetchUrlTokens to set
+   */
+  public void setFetchUrlTokens(String fetchUrlTokens) {
+    this.fetchUrlTokens = fetchUrlTokens;
   }
 }

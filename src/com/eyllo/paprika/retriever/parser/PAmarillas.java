@@ -3,7 +3,7 @@
  */
 package com.eyllo.paprika.retriever.parser;
 
-import com.eyllo.paprika.retriever.RetrieverConstants;
+import com.eyllo.paprika.retriever.RetrieverProperties;
 import com.eyllo.paprika.retriever.parser.elements.PersistentEntity;
 
 /**

@@ -3,7 +3,7 @@ package com.eyllo.paprika.keeper;
 import org.elasticsearch.common.geo.GeoDistance;
 import org.elasticsearch.common.unit.DistanceUnit;
 
-public class ConstantsStore {
+public class KeeperProperties {
 
 	/**
 	 * Default distance unit to be used for querying entities.

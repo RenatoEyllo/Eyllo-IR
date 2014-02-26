@@ -1,6 +1,6 @@
 package com.eyllo.paprika.retriever.parser;
 
-import static com.eyllo.paprika.retriever.parser.ParserConstants.ENCODING_UTF8;
+import static com.eyllo.paprika.retriever.parser.ParserProperties.ENCODING_UTF8;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -87,7 +87,7 @@ public class ParserUtils {
   public static Document connectGetUrl(String pUrl){
     Document doc = null;
     try {
-      doc = Jsoup.connect(pUrl).timeout(ParserConstants.MAX_CONN_TIME).get();
+      doc = Jsoup.connect(pUrl).timeout(ParserProperties.MAX_CONN_TIME).get();
     } catch (IOException e) {
       LOGGER.error("Error while connecting to " + pUrl);
       e.printStackTrace();
@@ -104,7 +104,7 @@ public class ParserUtils {
   public static Document connectPostUrl(String pUrl, Map<String, String> params) {
     Document doc = null;
     try {
-      doc = Jsoup.connect(pUrl).ignoreContentType(true).timeout(ParserConstants.MAX_CONN_TIME).data(params).post();
+      doc = Jsoup.connect(pUrl).ignoreContentType(true).timeout(ParserProperties.MAX_CONN_TIME).data(params).post();
     } catch (IOException e) {
       LOGGER.error("Error while connecting to " + pUrl);
       e.printStackTrace();
@@ -124,7 +124,7 @@ public class ParserUtils {
     try {
       Connection con = Jsoup.connect(pUrl)
           .ignoreContentType(true)
-          .timeout(ParserConstants.MAX_CONN_TIME);
+          .timeout(ParserProperties.MAX_CONN_TIME);
       for (String cookieName : cookies.keySet()) {
         con.cookie(cookieName, cookies.get(cookieName));
       }
@@ -144,7 +144,7 @@ public class ParserUtils {
     try {
       res = Jsoup.connect(pUrl)
           .ignoreContentType(true)
-          .timeout(ParserConstants.MAX_CONN_TIME)
+          .timeout(ParserProperties.MAX_CONN_TIME)
           .method(Method.POST)
           .execute();
       cookieVal = res.cookie(cookieName);

@@ -17,7 +17,7 @@ public class UtilsStore {
 	 * @return DistanceUnit used inside ElasticSearch.
 	 */
 	public static DistanceUnit getDistanceUnit(String pDistanceUnit) { 
-		DistanceUnit disUnit = ConstantsStore.DEFAULT_DIST_UNIT;
+		DistanceUnit disUnit = KeeperProperties.DEFAULT_DIST_UNIT;
 		  if (pDistanceUnit.equals("km"))
 			  disUnit = DistanceUnit.KILOMETERS;
 		  else if (pDistanceUnit.equals("cm"))

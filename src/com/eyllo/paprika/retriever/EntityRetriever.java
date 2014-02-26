@@ -60,14 +60,17 @@ public class EntityRetriever {
     setUpRetrieverProps(pParserProperties);
     // Keeper in charge to storing results for each parser run
     EntityKeeper entKeeper = new EntityKeeper(this.backendEntities,
-        pParserProperties.getProperty(RetrieverConstants.RET_BACKEND_SRVR_ADD),
-        pParserProperties.getProperty(RetrieverConstants.RET_BACKEND_SRVR_PORT));
+        pParserProperties.getProperty(RetrieverProperties.RET_BACKEND_SRVR_ADD),
+        pParserProperties.getProperty(RetrieverProperties.RET_BACKEND_SRVR_PORT));
     while (this.numRuns > 0) {
       getLogger().info("===========================");
       getLogger().info("A new run is starting . . .");
       getLogger().info("===========================");
+      // Get updated data.
       Map<Object, PersistentEntity> entMap = parser.fetchEntities();
+      // Clear everything before updating.
       entKeeper.deleteAll("paprika", "geoTags", "{\"scenarioId\":27}");
+      // Update with all new information.
       entKeeper.saveEntities(entMap);
       waitPolitely(this.timeInterleaved);
       System.out.println(parser.getParserName());
@@ -92,12 +95,12 @@ public class EntityRetriever {
    * @param pRetrieverProps
    */
   public void setUpRetrieverProps(Properties pRetrieverProps) {
-    String tmpValue = pRetrieverProps.getProperty(RetrieverConstants.RET_BACKEND_ENTITIES);
-    backendEntities = (tmpValue == null|| tmpValue.isEmpty())?RetrieverConstants.RET_DEF_BACKEND_ENT:tmpValue;
-    tmpValue = pRetrieverProps.getProperty(RetrieverConstants.RET_RUNS_NUM);
-    numRuns = (tmpValue == null|| tmpValue.isEmpty())?RetrieverConstants.DEFAULT_NUM_RUNS:Integer.parseInt(tmpValue);
-    tmpValue = pRetrieverProps.getProperty(RetrieverConstants.RET_RUNS_INTERLEAVE);
-    timeInterleaved = (tmpValue == null|| tmpValue.isEmpty())?RetrieverConstants.DEFAULT_TIME_INTERLEAVED:Integer.parseInt(tmpValue);
+    String tmpValue = pRetrieverProps.getProperty(RetrieverProperties.RET_BACKEND_ENTITIES);
+    backendEntities = (tmpValue == null|| tmpValue.isEmpty())?RetrieverProperties.RET_DEF_BACKEND_ENT:tmpValue;
+    tmpValue = pRetrieverProps.getProperty(RetrieverProperties.RET_RUNS_NUM);
+    numRuns = (tmpValue == null|| tmpValue.isEmpty())?RetrieverProperties.DEFAULT_NUM_RUNS:Integer.parseInt(tmpValue);
+    tmpValue = pRetrieverProps.getProperty(RetrieverProperties.RET_RUNS_INTERLEAVE);
+    timeInterleaved = (tmpValue == null|| tmpValue.isEmpty())?RetrieverProperties.DEFAULT_TIME_INTERLEAVED:Integer.parseInt(tmpValue);
     parser = getCorrectParser(pRetrieverProps);
     if (parser == null)
       getLogger().warn("Retriever could NOT create the specific parser.");
@@ -111,27 +114,31 @@ public class EntityRetriever {
     AbstractParser parser = null;
     ArrayList<Object> initargs = new ArrayList<Object> ();
     //pMaxPageNumber
-    String tmpValue = pParserProps.getProperty(RetrieverConstants.RPARSER_MAXPAGENUM);
+    String tmpValue = pParserProps.getProperty(RetrieverProperties.RPARSER_MAXPAGENUM);
     initargs.add((tmpValue == null || tmpValue.isEmpty())?Integer.MAX_VALUE:Integer.parseInt(tmpValue));
     //pMaxNumEntities
-    tmpValue = pParserProps.getProperty(RetrieverConstants.RPARSER_MAXNUMENT);
+    tmpValue = pParserProps.getProperty(RetrieverProperties.RPARSER_MAXNUMENT);
     initargs.add((tmpValue == null)?Integer.MAX_VALUE:Integer.parseInt(tmpValue));
     //pFetchUrl
-    tmpValue = pParserProps.getProperty(RetrieverConstants.RPARSER_FETCHURL);
+    tmpValue = pParserProps.getProperty(RetrieverProperties.RPARSER_FETCHURL);
+    initargs.add((tmpValue == null)?"":tmpValue);
+    //pFetchUrlTokens
+    tmpValue = pParserProps.getProperty(RetrieverProperties.RPARSER_FETCHURL_TOKENS);
     initargs.add((tmpValue == null)?"":tmpValue);
     //pOutPath
-    tmpValue = pParserProps.getProperty(RetrieverConstants.RPARSER_OUTPATH);
+    tmpValue = pParserProps.getProperty(RetrieverProperties.RPARSER_OUTPATH);
     initargs.add((tmpValue == null)?"":tmpValue);
     //pLocal
-    tmpValue = pParserProps.getProperty(RetrieverConstants.RPARSER_LOCALSEARCH);
+    tmpValue = pParserProps.getProperty(RetrieverProperties.RPARSER_LOCALSEARCH);
     initargs.add((tmpValue == null)?false:Boolean.parseBoolean(tmpValue));
     //pPoliteness
-    tmpValue = pParserProps.getProperty(RetrieverConstants.RPARSER_REQPOLITENESS);
+    tmpValue = pParserProps.getProperty(RetrieverProperties.RPARSER_REQPOLITENESS);
     initargs.add((tmpValue == null)?Integer.MAX_VALUE:Integer.parseInt(tmpValue));
 
     try {
-      tmpValue = this.getParserClassName(pParserProps.getProperty(RetrieverConstants.RPARSER_NAME));
+      tmpValue = this.getParserClassName(pParserProps.getProperty(RetrieverProperties.RPARSER_NAME));
       if (tmpValue != null) {
+        getLogger().info("Getting parser: " + tmpValue);
         Constructor<?> constr = Class.forName(tmpValue).getConstructor(AbstractParser.constrParams);
         parser = (AbstractParser) constr.newInstance(initargs.toArray());  
       } else {

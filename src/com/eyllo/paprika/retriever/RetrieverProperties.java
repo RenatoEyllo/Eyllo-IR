@@ -8,8 +8,13 @@ package com.eyllo.paprika.retriever;
  * the Entity Retriever job.
  * @author renatomarroquin
  */
-public class RetrieverConstants {
+public class RetrieverProperties {
 
+  /* Default values for Retriever. */
+  /** Default number of runs that Retriever will do.*/
+  public static int DEFAULT_NUM_RUNS = 1;
+  /** Default time interleaved between runs in ms. */
+  public static int DEFAULT_TIME_INTERLEAVED = 3000;
   /** Default geocoder. */
   public static String DEFAULT_GEOCODER = "google";
 
@@ -18,10 +23,6 @@ public class RetrieverConstants {
   public static String RET_RUNS_NUM = "retriever.runs.number";
   /** Time between retriever runs (seconds). */
   public static String RET_RUNS_INTERLEAVE = "retriever.runs.interleave";
-  /** Default number of runs that Retriever will do.*/
-  public static int DEFAULT_NUM_RUNS = 1;
-  /** Default time interleaved between runs. */
-  public static int DEFAULT_TIME_INTERLEAVED;
 
   /* Properties for Retriever backend. */
   /** Helps us decide where to store retrieved entities. */
@@ -39,6 +40,7 @@ public class RetrieverConstants {
   public static String RPARSER_MAXNUMENT = "retriever.parser.maxnument";
   public static String RPARSER_OUTPATH = "retriever.parser.outpath";
   public static String RPARSER_FETCHURL = "retriever.parser.fetchurl";
+  public static String RPARSER_FETCHURL_TOKENS = "retriever.parser.fetchurl.tokens";
   public static String RPARSER_LOCALSEARCH = "retriever.parser.localsearch";
   public static String RPARSER_REQPOLITENESS = "retriever.parser.reqpoliteness";
 }

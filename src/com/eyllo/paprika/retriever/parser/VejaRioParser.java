@@ -165,15 +165,15 @@ public class VejaRioParser {
           else if (extraInfos.get(iCntInf).text().toLowerCase().contains("bairro")){
             // adding address
             ///entLoc.setAddress(entLoc.getAddress() + VejaRioParser.INFO_SEP + extraInfos.get(iCntInf).ownText());
-              entLoc.setAddress(new Utf8(entLoc.getAddress().toString() + ParserConstants.INFO_SEP + extraInfos.get(iCntInf).ownText()));
+              entLoc.setAddress(new Utf8(entLoc.getAddress().toString() + ParserProperties.INFO_SEP + extraInfos.get(iCntInf).ownText()));
             // adding city
             ///entLoc.setAddress(entLoc.getAddress() + VejaRioParser.INFO_SEP + VejaRioParser.DEFAULT_CITY);
-              entLoc.setAddress(new Utf8(entLoc.getAddress().toString() + ParserConstants.INFO_SEP + VejaRioParser.DEFAULT_CITY));
+              entLoc.setAddress(new Utf8(entLoc.getAddress().toString() + ParserProperties.INFO_SEP + VejaRioParser.DEFAULT_CITY));
           }
           else if (extraInfos.get(iCntInf).text().toLowerCase().contains("cep")){
             //System.out.println("CEP");
             ///entLoc.setAddress(entLoc.getAddress() + VejaRioParser.INFO_SEP + extraInfos.get(iCntInf).text());
-              entLoc.setAddress(new Utf8(entLoc.getAddress().toString() + ParserConstants.INFO_SEP + extraInfos.get(iCntInf).text()));
+              entLoc.setAddress(new Utf8(entLoc.getAddress().toString() + ParserProperties.INFO_SEP + extraInfos.get(iCntInf).text()));
           }
           else if (extraInfos.get(iCntInf).text().toLowerCase().contains("telefone"))
             ///pEntity.setProperties(EntityUtils.PHONES, extraInfos.get(iCntInf).ownText());

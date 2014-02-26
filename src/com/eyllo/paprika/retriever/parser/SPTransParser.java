@@ -19,6 +19,7 @@ import org.json.simple.JSONObject;
 import org.jsoup.nodes.Document;
 
 import com.eyllo.paprika.keeper.EntityKeeper;
+import com.eyllo.paprika.orchestrator.OrchestratorProperties;
 import com.eyllo.paprika.retriever.parser.elements.EylloLocation;
 import com.eyllo.paprika.retriever.parser.elements.PersistentEntity;
 import com.eyllo.paprika.retriever.parser.elements.PersistentPoint;
@@ -36,7 +37,9 @@ public class SPTransParser extends AbstractParser {
   /** Default API URL. */
   private static final String OV_DEFAULT_API_URL = "http://api.olhovivo.sptrans.com.br/v0";
   /** API Token. */
-  private static final String OV_DEFAULT_API_TOKEN = "51d279ac1e7cc3ceac47590e9f0acbbafa79bb9ee7fb8e164b77837eede65aaf";
+  private String[] apiTokens;
+  /** API Token index of the current one. */
+  private int apiTokenIndex;
   /** API Authenticate URL. */
   private static final String OV_API_AUTH = "/Login/Autenticar?token=";
   /** API Search URL. */
@@ -76,44 +79,80 @@ public class SPTransParser extends AbstractParser {
    * @param pName to identify parser.
    * @param pOutPath to export entities to JSON file.
    * @param pFetchUrl from where to extract entities.
+   * @param pFetchUrlTokens to be used while fetching data from URL.
    * @param pLocal Whether or not the search process will include local search.
    * @param pPoliteness  Time to wait between external request.
    */
   public SPTransParser(int pMaxPageNumber, int pMaxNumEntities,
-      String pFetchUrl, String pOutPath,
+      String pFetchUrl, String pFetchUrlTokens, String pOutPath,
       boolean pLocal, int pPoliteness) {
     if (pFetchUrl.isEmpty())
       pFetchUrl = OV_DEFAULT_API_URL;
     if (pOutPath.isEmpty())
-      pOutPath = ParserConstants.DEFAULT_OUTPUT_PATH;
+      pOutPath = ParserProperties.DEFAULT_OUTPUT_PATH;
     if (pPoliteness == 0)
-      pPoliteness = ParserConstants.DEFAULT_REQ_POLITENESS;
+      pPoliteness = ParserProperties.DEFAULT_REQ_POLITENESS;
+    // SPTransParser needs fetchingTokens for connecting.
+    if (pFetchUrl.isEmpty())
+      getLogger().error("There are no fetch tokens for connecting to URL.");
     this.setParserName(NAME);
-    initialize(pMaxPageNumber, pMaxNumEntities, pOutPath, pFetchUrl, pLocal, pPoliteness);
+    initialize(pMaxPageNumber, pMaxNumEntities, pOutPath, pFetchUrl, pFetchUrlTokens, pLocal, pPoliteness);
     getLogger().info("Running parser *" + getParserName() + "* using MAX values for retrieving.");
-    this.setAuthCookie(getCookieSpAuthenticate());
+    this.setApiTokens(getFetchUrlTokens());
+    this.updateAuthCookie();
   }
 
   /**
    * Constructor.
    * @param pMaxPageNumber maximum number of pages to be visited.
    * @param pMaxNumEntities maximum number of entities to be obtained.
+   * @param pLocal Whether or not the search process will include local search.
    */
   public SPTransParser(int pMaxPageNumber, int pMaxNumEntities, boolean pLocal) {
     super(pMaxPageNumber, pMaxNumEntities,
-        ParserConstants.DEFAULT_OUTPUT_PATH, OV_DEFAULT_API_URL,
-        pLocal, ParserConstants.DEFAULT_REQ_POLITENESS);
-    this.setAuthCookie(getCookieSpAuthenticate());
-    
+        ParserProperties.DEFAULT_OUTPUT_PATH,
+        OV_DEFAULT_API_URL, ParserProperties.DEFAULT_FETCH_URL_TOKENS,
+        pLocal, ParserProperties.DEFAULT_REQ_POLITENESS);
+    // SPTransParser needs fetchingTokens for connecting.
+    getLogger().error("There are no fetch tokens for connecting to URL.");
+    this.setApiTokens(getFetchUrlTokens());
+    this.updateAuthCookie();
   }
 
   /**
    * Default constructor.
    */
   public SPTransParser() {
-    super(Integer.MAX_VALUE, Integer.MAX_VALUE, OV_DEFAULT_API_URL);
+    super(Integer.MAX_VALUE, Integer.MAX_VALUE, OV_DEFAULT_API_URL, ParserProperties.DEFAULT_FETCH_URL_TOKENS);
+    // SPTransParser needs fetchingTokens for connecting.
+    getLogger().error("There are no fetch tokens for connecting to URL.");
     getLogger().info("Running parser " + getParserName() + " using MAX values for retrieving.");
-    this.setAuthCookie(getCookieSpAuthenticate());
+    this.setApiTokens(getFetchUrlTokens());
+    this.updateAuthCookie();
+  }
+
+  /**
+   * Updates a cookie after authenticating using the corresponding API Token.
+   * Uses a roundRobined element from the API Tokens array.
+   */
+  public void updateAuthCookie() {
+    String authUrl = OV_DEFAULT_API_URL + OV_API_AUTH + this.getRoundRobinElement();
+    String cookieVal = ParserUtils.getCookie(authUrl, OV_COOKIE_NAME);
+    this.setAuthCookie(cookieVal);
+  }
+
+  /**
+   * Gets the next roundRobined API token.
+   * @return
+   */
+  private String getRoundRobinElement() {
+    String tmpElem = "";
+    if (this.getApiTokens() != null && this.getApiTokens().length > 0) {
+      if (++this.apiTokenIndex > this.getApiTokens().length)
+        this.setApiTokenIndex(0);
+      tmpElem = this.getApiTokens()[this.apiTokenIndex];
+    }
+    return tmpElem;
   }
 
   /**
@@ -142,11 +181,25 @@ public class SPTransParser extends AbstractParser {
     return this.pEntities;
   }
 
-  @Override
-  public void parseSearchResults(String url) {
+  private Document tryConn(String pUrl) {
     Map<String, String> cookies = new HashMap<String, String> ();
     cookies.put(OV_COOKIE_NAME, this.getAuthCookie());
-    Document doc = ParserUtils.connectCookiePostUrl(url, cookies);
+    Document doc = ParserUtils.connectCookiePostUrl(pUrl, cookies);
+    while (doc == null) {
+      this.updateAuthCookie();
+      cookies.clear();
+      cookies.put(OV_COOKIE_NAME, this.getAuthCookie());
+      doc = ParserUtils.connectCookiePostUrl(pUrl, cookies);
+      getLogger().info("Waitining politely for " + getPoliteness()/1000 + " secs until next retry.");
+      waitPolitely();
+    }
+    return doc;
+  }
+
+  @Override
+  public void parseSearchResults(String url) {
+    Document doc = tryConn(url);
+    // TODO Check if this is ever null, but it shouldn't be.
     if (doc != null) {
       JSONArray jArray = (JSONArray)ParserUtils.getJsonObj(doc.text());
       System.out.println(url + ": " + jArray.size());
@@ -249,9 +302,9 @@ public class SPTransParser extends AbstractParser {
                 //System.out.println("Time to arrival: " + difference + " minutes.");
                 if (!stopDesc.toString().isEmpty())
                   stopDesc.append("<br>");
-                stopDesc.append(busLineJson.get("c")).append(ParserConstants.INFO_SEP);
-                stopDesc.append(busLineJson.get("lt0")).append(ParserConstants.DESC_SEP).append(busLineJson.get("lt1"));
-                stopDesc.append(ParserConstants.INFO_SEP);
+                stopDesc.append(busLineJson.get("c")).append(ParserProperties.INFO_SEP);
+                stopDesc.append(busLineJson.get("lt0")).append(ParserProperties.DESC_SEP).append(busLineJson.get("lt1"));
+                stopDesc.append(ParserProperties.INFO_SEP);
                 stopDesc.append(difference + " mins.");
                 //pObjs.put(tmpObj.get("CodigoParada").toString(), tmpObj);
                 //eKeeper.save(pObjs, pStopsForecastSchemaName, pStopsForecastTypeName);
@@ -336,12 +389,12 @@ public class SPTransParser extends AbstractParser {
      // 2. For each JSON object from the keeper, perform a request.
       for(Object busLine : busLines) {
         // TODO if a bus line already exists locally then we shouldn't do a request
+        // we should include a new index of a lineBus including all ifs stops, and 
+        // according to that whether to retrieve them or to fetched them locally
         String lineCode = ((SearchHit)busLine).getSource().get("CodigoLinha").toString();
         String url = OV_DEFAULT_API_URL + OV_API_STOPS_SEARCH + lineCode;
-        Map<String, String> cookies = new HashMap<String, String> ();
-        cookies.put(OV_COOKIE_NAME, this.getAuthCookie());
-        Document doc = ParserUtils.connectCookiePostUrl(url, cookies);
-        /////
+        Document doc = tryConn(url);
+        ///\\\\\\\//
         if (doc != null) {
           JSONArray jArray = (JSONArray)ParserUtils.getJsonObj(doc.text());
           getLogger().info("Stops for: " +url + " Total:" + jArray.size() + " stops.");
@@ -385,9 +438,7 @@ public class SPTransParser extends AbstractParser {
       for(Object busLine : busLines) {
         String lineCode = ((SearchHit)busLine).getSource().get("CodigoLinha").toString();
         String url = OV_DEFAULT_API_URL + OV_API_STOPS_FORECAST_LINE_SEARCH + lineCode;
-        Map<String, String> cookies = new HashMap<String, String> ();
-        cookies.put(OV_COOKIE_NAME, this.getAuthCookie());
-        Document doc = ParserUtils.connectCookiePostUrl(url, cookies);
+        Document doc = tryConn(url);
         //TODO These elements should be parse correctly.
         System.out.println(doc.text());
       }
@@ -410,16 +461,6 @@ public class SPTransParser extends AbstractParser {
       stopsList.add(olhoVivoJsonToPE(tmpObj));
     }
     return stopsList;
-  }
-
-  /**
-   * Gets a cookie after authenticating.
-   * @return
-   */
-  private String getCookieSpAuthenticate() {
-    String authUrl = OV_DEFAULT_API_URL + OV_API_AUTH + OV_DEFAULT_API_TOKEN;
-    String cookieVal = ParserUtils.getCookie(authUrl, OV_COOKIE_NAME);
-    return cookieVal;
   }
 
   /**
@@ -497,5 +538,35 @@ public class SPTransParser extends AbstractParser {
    */
   public void setAuthCookie(String authCookie) {
     this.authCookie = authCookie;
+  }
+
+  /**
+   * @return the apiTokens
+   */
+  public String[] getApiTokens() {
+    return apiTokens;
+  }
+
+  /**
+   * Sets API tokens.
+   * @param apiTokens the apiTokens to set
+   */
+  public void setApiTokens(String pApiTokens) {
+    if (pApiTokens != null && !pApiTokens.isEmpty())
+      this.apiTokens = pApiTokens.split(OrchestratorProperties.PROP_VALS_SEP);
+  }
+
+  /**
+   * @return the apiTokenIndex
+   */
+  public int getApiTokenIndex() {
+    return apiTokenIndex;
+  }
+
+  /**
+   * @param apiTokenIndex the apiTokenIndex to set
+   */
+  public void setApiTokenIndex(int apiTokenIndex) {
+    this.apiTokenIndex = apiTokenIndex;
   }
 }

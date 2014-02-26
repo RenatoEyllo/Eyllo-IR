@@ -67,8 +67,8 @@ public class VejaSaoPauloParser {
    * Default constructor
    */
   public VejaSaoPauloParser() {
-    this.setMaxPageNumber(ParserConstants.DEFAULT_SEARCH_PAGES);
-    setScenarioId(ParserConstants.DEFAULT_SCENARIOID);
+    this.setMaxPageNumber(ParserProperties.DEFAULT_SEARCH_PAGES);
+    setScenarioId(ParserProperties.DEFAULT_SCENARIOID);
     this.pEntities = new ArrayList<PersistentEntity>();
   }
 
@@ -78,7 +78,7 @@ public class VejaSaoPauloParser {
    */
   public VejaSaoPauloParser(int pNumSearchPages) {
     this.setMaxPageNumber(pNumSearchPages);
-    setScenarioId(ParserConstants.DEFAULT_SCENARIOID);
+    setScenarioId(ParserProperties.DEFAULT_SCENARIOID);
     this.pEntities = new ArrayList<PersistentEntity>();
   }
 
@@ -110,8 +110,8 @@ public class VejaSaoPauloParser {
       String url = DEFAULT_VSP_URL.concat(DEFAULT_VSP_FOOD_SEARCH_URL);
       while ( iCnt < this.getMaxPageNumber()){
         iCnt+=1;
-        LOGGER.info("Getting: "+ url.replace(ParserConstants.PARAM_NUM, String.valueOf(iCnt)));
-        this.parseSearchResults(url.replace(ParserConstants.PARAM_NUM, String.valueOf(iCnt)));
+        LOGGER.info("Getting: "+ url.replace(ParserProperties.PARAM_NUM, String.valueOf(iCnt)));
+        this.parseSearchResults(url.replace(ParserProperties.PARAM_NUM, String.valueOf(iCnt)));
         break;
       }
       LOGGER.info("Hubo # entidades : " + this.totalEntities());
@@ -161,7 +161,7 @@ public class VejaSaoPauloParser {
         Elements workElems = doc.select("div[class*=information-unwanted]").select("div[class*=working-hours]");
         if (workElems !=  null && workElems.size() > 0){
           for(Element info : workElems.select("div[class*=hours]").select("p"))
-            strBuilder.append(info.text().replace("-", "_")).append(ParserConstants.INFO_SEP);
+            strBuilder.append(info.text().replace("-", "_")).append(ParserProperties.INFO_SEP);
           pEntity.setSchedule(new Utf8(strBuilder.toString()));
         }
 
@@ -169,7 +169,7 @@ public class VejaSaoPauloParser {
         workElems = doc.select("div[class*=information-unwanted]").select("div[class*=price]").select("p[class*=price-range]");
         strBuilder.delete(0, strBuilder.length());
         if (workElems !=  null && workElems.size() > 0){
-          strBuilder.append(doc.select("div[class*=price]").select("h3").first().text() + ParserConstants.DESC_SEP);
+          strBuilder.append(doc.select("div[class*=price]").select("h3").first().text() + ParserProperties.DESC_SEP);
           strBuilder.append(workElems.text());
           pEntity.addToExtraInfo(new Utf8(strBuilder.toString()));
           //LOGGER.debug(strBuilder.toString());
@@ -179,10 +179,10 @@ public class VejaSaoPauloParser {
         workElems = doc.select("div[class*=information-unwanted]").select("div[class*=payment]").select("p");
         strBuilder.delete(0, strBuilder.length());
         if (workElems != null && workElems.size() > 0){
-          strBuilder.append(doc.select("div[class*=payment]").select("h3").first().text() + ParserConstants.DESC_SEP);
+          strBuilder.append(doc.select("div[class*=payment]").select("h3").first().text() + ParserProperties.DESC_SEP);
           for (Element infoElem : workElems)
             if (!infoElem.text().trim().equals("")){
-              strBuilder.append(infoElem.text().trim() + ParserConstants.INFO_SEP);
+              strBuilder.append(infoElem.text().trim() + ParserProperties.INFO_SEP);
             }
         }//END-IF_PAYMENT
 
